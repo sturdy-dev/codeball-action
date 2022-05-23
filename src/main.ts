@@ -11,6 +11,8 @@ async function run(): Promise<void> {
   try {
     const github = require('@actions/github')
 
+    console.log(`payload: ${github.context.payload}`)
+
     const pullRequestURL = github.context.payload?.pull_request?.html_url
 
     if (!pullRequestURL) {
