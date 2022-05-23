@@ -37,10 +37,13 @@ function run() {
             }
             const { Octokit } = __nccwpck_require__(6762);
             const octokit = new Octokit();
-            yield octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
+            yield octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
                 owner: github.context.payload.organization.login,
                 repo: github.context.payload.repository.name,
-                pull_number: github.context.payload.pull_request.number
+                pull_number: github.context.payload.pull_request.number,
+                commit_id: github.context.payload.pull_request.head.sha,
+                body: 'LGTM!',
+                event: 'APPROVE'
             });
             // github.context.payload?.pull_request?.
         }
