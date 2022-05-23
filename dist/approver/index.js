@@ -68,10 +68,10 @@ function run() {
                 return;
             }
             if (((_c = job.contribution) === null || _c === void 0 ? void 0 : _c.result) !== 'approved') {
-                core.debug(`Job ${jobID} is not approved, will not approve the PR`);
+                core.info(`Job ${jobID} is not approved, will not approve the PR`);
                 return;
             }
-            core.debug(`Job ${jobID} is approved, approving the PR now!`);
+            core.info(`Job ${jobID} is approved, approving the PR now!`);
             const octokit = new Octokit();
             yield octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
                 owner: github.context.payload.organization.login,
