@@ -15,7 +15,7 @@ async function run(): Promise<void> {
       return
     }
 
-    const {Octokit} = require('@octokit/core')
+    const {Octokit} = require('@octokit/action')
 
     const octokit = new Octokit()
 
