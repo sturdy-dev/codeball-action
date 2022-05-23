@@ -23,7 +23,7 @@ async function run(): Promise<void> {
     }
 
     const jobID = core.getInput('codeball-job-id')
-    core.debug(`Job ID: ${jobID}`)
+    core.info(`Job ID: ${jobID}`)
 
     let job = await getJob(jobID)
     let attempts = 0
