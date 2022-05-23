@@ -48,11 +48,11 @@ async function run(): Promise<void> {
     }
 
     if (job.contribution?.result !== 'approved') {
-      core.debug(`Job ${jobID} is not approved, will not approve the PR`)
+      core.info(`Job ${jobID} is not approved, will not approve the PR`)
       return
     }
 
-    core.debug(`Job ${jobID} is approved, approving the PR now!`)
+    core.info(`Job ${jobID} is approved, approving the PR now!`)
 
     const octokit = new Octokit()
 
