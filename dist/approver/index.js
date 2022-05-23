@@ -49,6 +49,7 @@ function run() {
                 return;
             }
             const jobID = core.getInput('codeball-job-id');
+            core.debug(`Job ID: ${jobID}`);
             let job = yield getJob(jobID);
             let attempts = 0;
             const maxAttempts = 30;
