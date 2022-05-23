@@ -34,7 +34,7 @@ function run() {
         const core = __nccwpck_require__(2186);
         try {
             const github = __nccwpck_require__(5438);
-            console.log(`payload: ${github.context.payload}`);
+            console.log(`payload: ${JSON.stringify(github.context.payload, null, '  ')}`);
             const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
             if (!pullRequestURL) {
                 core.setFailed('No pull request URL found');
