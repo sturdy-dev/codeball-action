@@ -1,4 +1,4 @@
-name: 'Codeball Action'
+name: 'Codeball Approver'
 description: 'Codeball (beta)'
 icon: check
 color: orange
@@ -9,4 +9,4 @@ inputs:
     required: false
 runs:
   using: 'node16'
-  main: 'dist/index.js'
+  main: '../dist/baller/index.js'

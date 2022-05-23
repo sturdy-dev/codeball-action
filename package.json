@@ -8,7 +8,9 @@
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
+    "package-baller": "ncc build lib/baller/main.js --out dist/baller --source-map --license licenses.txt",
+    "package-approver": "ncc build lib/approver/main.js --out dist/approver --source-map --license licenses.txt",
+    "package": "yarn package-baller && yarn package-approver",
     "test": "jest",
     "all": "yarn build && yarn format && yarn lint && yarn package && yarn test"
   },
