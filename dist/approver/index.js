@@ -29,7 +29,7 @@ function run() {
         const core = __nccwpck_require__(2186);
         try {
             const github = __nccwpck_require__(5438);
-            console.log(`payload: ${github.context.payload}`);
+            console.log(`payload: ${JSON.stringify(github.context.payload, null, '  ')}`);
             const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
             if (!pullRequestURL) {
                 core.setFailed('No pull request URL found');
@@ -38,7 +38,7 @@ function run() {
             const { Octokit } = __nccwpck_require__(6762);
             const octokit = new Octokit();
             yield octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
-                owner: github.context.payload.organization.owner.login,
+                owner: github.context.payload.organization.login,
                 repo: github.context.payload.repository.name,
                 pull_number: github.context.payload.pull_request.number
             });

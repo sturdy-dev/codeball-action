@@ -4,7 +4,9 @@ async function run(): Promise<void> {
   try {
     const github = require('@actions/github')
 
-    console.log(`payload: ${github.context.payload}`)
+    console.log(
+      `payload: ${JSON.stringify(github.context.payload, null, '  ')}`
+    )
 
     const pullRequestURL = github.context.payload?.pull_request?.html_url
 
@@ -20,7 +22,7 @@ async function run(): Promise<void> {
     await octokit.request(
       'GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews',
       {
-        owner: github.context.payload.organization.owner.login,
+        owner: github.context.payload.organization.login,
         repo: github.context.payload.repository.name,
         pull_number: github.context.payload.pull_request.number
       }
