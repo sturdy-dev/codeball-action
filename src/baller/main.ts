@@ -11,10 +11,6 @@ async function run(): Promise<void> {
   try {
     const github = require('@actions/github')
 
-    console.log(
-      `payload: ${JSON.stringify(github.context.payload, null, '  ')}`
-    )
-
     const pullRequestURL = github.context.payload?.pull_request?.html_url
 
     if (!pullRequestURL) {
@@ -25,7 +21,8 @@ async function run(): Promise<void> {
     core.info(`Found contribution: ${pullRequestURL}`)
 
     const data = {
-      url: pullRequestURL
+      url: pullRequestURL,
+      access_token: core.getInput('GITHUB_TOKEN')
     }
 
     const response = await fetch('https://api.codeball.forfunc.com/jobs', {
@@ -35,6 +32,7 @@ async function run(): Promise<void> {
     const resData = (await response.json()) as JobResponse
 
     core.info(`Job created: ${resData.id}`)
+    core.setOutput('codeball-job-id', resData.id)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

@@ -34,7 +34,6 @@ function run() {
         const core = __nccwpck_require__(2186);
         try {
             const github = __nccwpck_require__(5438);
-            console.log(`payload: ${JSON.stringify(github.context.payload, null, '  ')}`);
             const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
             if (!pullRequestURL) {
                 core.setFailed('No pull request URL found');
@@ -42,7 +41,8 @@ function run() {
             }
             core.info(`Found contribution: ${pullRequestURL}`);
             const data = {
-                url: pullRequestURL
+                url: pullRequestURL,
+                access_token: core.getInput('GITHUB_TOKEN')
             };
             const response = yield (0, node_fetch_1.default)('https://api.codeball.forfunc.com/jobs', {
                 method: 'POST',
@@ -50,6 +50,7 @@ function run() {
             });
             const resData = (yield response.json());
             core.info(`Job created: ${resData.id}`);
+            core.setOutput('codeball-job-id', resData.id);
         }
         catch (error) {
             if (error instanceof Error)

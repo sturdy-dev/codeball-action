@@ -1,12 +1,16 @@
-name: 'Codeball Approver'
-description: 'Codeball (beta)'
-icon: check
-color: orange
+name: 'Codeball Baller'
+description: 'Codeball Baller (beta)'
+branding:
+  icon: check
+  color: orange
 inputs:
   GITHUB_TOKEN:
     description: 'Default to {{ github.token }}. This is the default GitHub token available to actions and is used to run Codeball and to post the result. The default token permissions (https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#permissions) work fine.'
     default: '${{ github.token }}'
     required: false
+outputs:
+  codeball-job-id:
+    description: 'ID of the Codeball Job'
 runs:
   using: 'node16'
   main: '../dist/baller/index.js'

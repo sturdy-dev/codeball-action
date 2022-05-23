@@ -12,7 +12,7 @@
     "package-approver": "ncc build lib/approver/main.js --out dist/approver --source-map --license licenses.txt",
     "package": "yarn package-baller && yarn package-approver",
     "test": "jest",
-    "all": "yarn build && yarn format && yarn lint && yarn package && yarn test"
+    "all": "yarn build && yarn format && yarn lint && yarn package"
   },
   "repository": {
     "type": "git",

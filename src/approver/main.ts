@@ -1,12 +1,19 @@
+import fetch from 'node-fetch'
+import {Job} from './types'
+import {isContributionJob, isFinalStatus} from './utils'
+
+async function getJob(id: string): Promise<Job> {
+  const res = await fetch(`https://api.codeball.forfunc.com/jobs/${id}`)
+  const data = (await res.json()) as Job
+  return data
+}
+
 async function run(): Promise<void> {
   const core = require('@actions/core')
 
   try {
     const github = require('@actions/github')
-
-    console.log(
-      `payload: ${JSON.stringify(github.context.payload, null, '  ')}`
-    )
+    const {Octokit} = require('@octokit/action')
 
     const pullRequestURL = github.context.payload?.pull_request?.html_url
 
@@ -15,7 +22,36 @@ async function run(): Promise<void> {
       return
     }
 
-    const {Octokit} = require('@octokit/action')
+    const jobID = core.getInput('codeball-job-id')
+
+    let job = await getJob(jobID)
+    let attempts = 0
+    const maxAttempts = 30
+    while (attempts < maxAttempts && !isFinalStatus(job.status)) {
+      attempts++
+      core.info(
+        `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
+      )
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      job = await getJob(jobID)
+    }
+
+    if (!isFinalStatus(job.status)) {
+      core.setFailed(`Job ${jobID} is not finished`)
+      return
+    }
+
+    if (!isContributionJob(job)) {
+      core.setFailed(`Job ${jobID} is not a contribution job`)
+      return
+    }
+
+    if (job.contribution?.result !== 'approved') {
+      core.debug(`Job ${jobID} is not approved, will not approve the PR`)
+      return
+    }
+
+    core.debug(`Job ${jobID} is approved, approving the PR now!`)
 
     const octokit = new Octokit()
 
@@ -26,12 +62,10 @@ async function run(): Promise<void> {
         repo: github.context.payload.repository.name,
         pull_number: github.context.payload.pull_request.number,
         commit_id: github.context.payload.pull_request.head.sha,
-        body: 'LGTM!',
+        body: 'Codeball: LGTM! :+1:',
         event: 'APPROVE'
       }
     )
-
-    // github.context.payload?.pull_request?.
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
