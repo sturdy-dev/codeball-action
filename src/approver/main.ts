@@ -47,26 +47,45 @@ async function run(): Promise<void> {
       return
     }
 
-    if (job.contribution?.result !== 'approved') {
+    const approved = job.contribution?.result === 'approved'
+
+    if (approved) {
+      core.info(`Job ${jobID} is approved, approving the PR now!`)
+
+      const octokit = new Octokit()
+
+      await octokit.request(
+        'POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews',
+        {
+          owner: github.context.payload.organization.login,
+          repo: github.context.payload.repository.name,
+          pull_number: github.context.payload.pull_request.number,
+          commit_id: github.context.payload.pull_request.head.sha,
+          body: 'Codeball: LGTM! :+1:',
+          event: 'APPROVE'
+        }
+      )
+    } else {
       core.info(`Job ${jobID} is not approved, will not approve the PR`)
-      return
     }
 
-    core.info(`Job ${jobID} is approved, approving the PR now!`)
-
-    const octokit = new Octokit()
-
-    await octokit.request(
-      'POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews',
-      {
-        owner: github.context.payload.organization.login,
-        repo: github.context.payload.repository.name,
-        pull_number: github.context.payload.pull_request.number,
-        commit_id: github.context.payload.pull_request.head.sha,
-        body: 'Codeball: LGTM! :+1:',
-        event: 'APPROVE'
-      }
-    )
+    await core.summary
+      .addHeading('Codeball')
+      .addTable([
+        [
+          {data: 'Pull Request', header: true},
+          {data: 'Result', header: true}
+        ],
+        [
+          `#${github.context.payload.pull_request.number}`,
+          approved ? 'Approved ✅' : 'Not approved'
+        ]
+      ])
+      .addLink(
+        'View on web',
+        `https://codeball.forfunc.com/prediction/${jobID}`
+      )
+      .write()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
