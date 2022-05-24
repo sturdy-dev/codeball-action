@@ -59,20 +59,36 @@ function run() {
                 core.setFailed(`Job ${jobID} is not a contribution job`);
                 return;
             }
-            if (((_c = job.contribution) === null || _c === void 0 ? void 0 : _c.result) !== 'approved') {
-                core.info(`Job ${jobID} is not approved, will not approve the PR`);
-                return;
+            const approved = ((_c = job.contribution) === null || _c === void 0 ? void 0 : _c.result) === 'approved';
+            if (approved) {
+                core.info(`Job ${jobID} is approved, approving the PR now!`);
+                const octokit = new Octokit();
+                yield octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
+                    owner: github.context.payload.organization.login,
+                    repo: github.context.payload.repository.name,
+                    pull_number: github.context.payload.pull_request.number,
+                    commit_id: github.context.payload.pull_request.head.sha,
+                    body: 'Codeball: LGTM! :+1:',
+                    event: 'APPROVE'
+                });
             }
-            core.info(`Job ${jobID} is approved, approving the PR now!`);
-            const octokit = new Octokit();
-            yield octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
-                owner: github.context.payload.organization.login,
-                repo: github.context.payload.repository.name,
-                pull_number: github.context.payload.pull_request.number,
-                commit_id: github.context.payload.pull_request.head.sha,
-                body: 'Codeball: LGTM! :+1:',
-                event: 'APPROVE'
-            });
+            else {
+                core.info(`Job ${jobID} is not approved, will not approve the PR`);
+            }
+            yield core.summary
+                .addHeading('Codeball')
+                .addTable([
+                [
+                    { data: 'Pull Request', header: true },
+                    { data: 'Result', header: true }
+                ],
+                [
+                    `#${github.context.payload.pull_request.number}`,
+                    approved ? 'Approved ✅' : 'Not approved'
+                ]
+            ])
+                .addLink('View on web', `https://codeball.forfunc.com/prediction/${jobID}`)
+                .write();
         }
         catch (error) {
             if (error instanceof Error)
