@@ -23,7 +23,7 @@ const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
 const utils_1 = __nccwpck_require__(9465);
 function getJob(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const res = yield (0, node_fetch_1.default)(`https://api.codeball.forfunc.com/jobs/${id}`);
+        const res = yield (0, node_fetch_1.default)(`https://api.codeball.ai/jobs/${id}`);
         const data = (yield res.json());
         return data;
     });
@@ -87,7 +87,7 @@ function run() {
                     approved ? 'Approved ✅' : 'Not approved'
                 ]
             ])
-                .addLink('View on web', `https://codeball.forfunc.com/prediction/${jobID}`)
+                .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
                 .write();
         }
         catch (error) {

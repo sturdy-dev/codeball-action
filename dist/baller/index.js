@@ -36,7 +36,7 @@ function run() {
                 url: pullRequestURL,
                 access_token: core.getInput('GITHUB_TOKEN')
             };
-            const response = yield (0, node_fetch_1.default)('https://api.codeball.forfunc.com/jobs', {
+            const response = yield (0, node_fetch_1.default)('https://api.codeball.ai/jobs', {
                 method: 'POST',
                 body: JSON.stringify(data)
             });

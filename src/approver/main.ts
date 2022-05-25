@@ -81,10 +81,7 @@ async function run(): Promise<void> {
           approved ? 'Approved ✅' : 'Not approved'
         ]
       ])
-      .addLink(
-        'View on web',
-        `https://codeball.ai/prediction/${jobID}`
-      )
+      .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
       .write()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
