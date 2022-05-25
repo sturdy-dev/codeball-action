@@ -3,7 +3,7 @@ import {Job} from './types'
 import {isContributionJob, isFinalStatus} from './utils'
 
 async function getJob(id: string): Promise<Job> {
-  const res = await fetch(`https://api.codeball.forfunc.com/jobs/${id}`)
+  const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
   const data = (await res.json()) as Job
   return data
 }
@@ -83,7 +83,7 @@ async function run(): Promise<void> {
       ])
       .addLink(
         'View on web',
-        `https://codeball.forfunc.com/prediction/${jobID}`
+        `https://codeball.ai/prediction/${jobID}`
       )
       .write()
   } catch (error) {

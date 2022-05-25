@@ -4,7 +4,7 @@
 
 **Save time and $$$, use Codeball to perform an early review of all your code.**
 
-* [Online Demo](http://codeball.forfunc.com/)
+* [Online Demo](https://codeball.ai/)
 
 ## Quick Start
 

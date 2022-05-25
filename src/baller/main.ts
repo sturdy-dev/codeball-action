@@ -25,7 +25,7 @@ async function run(): Promise<void> {
       access_token: core.getInput('GITHUB_TOKEN')
     }
 
-    const response = await fetch('https://api.codeball.forfunc.com/jobs', {
+    const response = await fetch('https://api.codeball.ai/jobs', {
       method: 'POST',
       body: JSON.stringify(data)
     })
