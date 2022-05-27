@@ -1,8 +1,10 @@
 name: 'Codeball Approver'
 description: 'Codeball Approver (beta)'
+
 branding:
   icon: check
   color: orange
+
 inputs:
   GITHUB_TOKEN:
     description: 'Default to {{ github.token }}. This is the default GitHub token available to actions and is used to run Codeball and to post the result. The default token permissions (https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#permissions) work fine.'
@@ -11,6 +13,19 @@ inputs:
   codeball-job-id:
     description: 'The ID of the Codeball Job created by the Baller Action'
     required: true
+  do-label:
+    description: 'If "true", the action will label Pull Request if Codeball AI approves the contribution'
+    default: "true"
+    required: false
+  label-name:
+    description: 'Label value to be set.'
+    default: 'codeball:approved'
+    required: false
+  do-approve:
+    description: 'If "true", the action will submit an approving Pull Request review if Codeball AI approves the contribution'
+    default: "true"
+    required: false
+
 runs:
   using: 'node16'
   main: '../dist/approver/index.js'
