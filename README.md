@@ -23,6 +23,10 @@ jobs:
     steps:
       - name: Codeball AI Actions
         uses: sturdy-dev/codeball-action@v1
+        # with:
+        #   do-label: "true"                    # Configure if the action should label approved contributions
+        #   label-name: "codeball:approved"     # Configure the label name to set if Codeball approves the contribution
+        #   do-approve: "true"                  # Configure if the action should approve PRs that have been approved by Codeball
 ```
 
 2. 🎉 That's it! Codeball will now run on your pull requests, and will pre-approve your PR if it's a good one!
