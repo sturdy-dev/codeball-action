@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import {Job} from './types'
-import { isContributionJob, isFinalStatus } from "./utils";
+import {isContributionJob, isFinalStatus} from './utils'
 
 async function getJob(id: string): Promise<Job> {
   const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
@@ -81,9 +81,7 @@ async function run(): Promise<void> {
         }
 
         if (!haveLabel) {
-          core.info(
-            `Label "${labelName}" does not exist, creating it now`
-          )
+          core.info(`Label "${labelName}" does not exist, creating it now`)
           await octokit.issues.createLabel({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -92,9 +90,7 @@ async function run(): Promise<void> {
             description: 'Codeball approved this pull request'
           })
         } else {
-          core.debug(
-            `Label "${labelName}" already exists, will not create it`
-          )
+          core.debug(`Label "${labelName}" already exists, will not create it`)
         }
 
         await octokit.issues.addLabels({

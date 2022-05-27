@@ -29,7 +29,7 @@ function getJob(id) {
     });
 }
 function run() {
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         const core = __nccwpck_require__(2186);
         try {
@@ -37,11 +37,23 @@ function run() {
             const { Octokit } = __nccwpck_require__(1231);
             const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
             if (!pullRequestURL) {
-                core.setFailed('No pull request URL found');
-                return;
+                throw new Error('No pull request URL found');
+            }
+            const pullRequestNumber = (_d = (_c = github.context.payload) === null || _c === void 0 ? void 0 : _c.pull_request) === null || _d === void 0 ? void 0 : _d.number;
+            if (!pullRequestNumber) {
+                throw new Error('No pull request number found');
+            }
+            const commitId = (_e = github.context.payload.pull_request) === null || _e === void 0 ? void 0 : _e.head.sha;
+            if (!commitId) {
+                throw new Error('No commit ID found');
             }
             const jobID = core.getInput('codeball-job-id');
+            const doApprove = core.getInput('do-approve') === 'true';
+            const doLabel = core.getInput('do-label') === 'true';
+            const labelName = core.getInput('label-name');
             core.info(`Job ID: ${jobID}`);
+            core.info(`Do approve: ${doApprove}`);
+            core.info(`Do label: ${doLabel} with value: ${labelName}`);
             let job = yield getJob(jobID);
             let attempts = 0;
             const maxAttempts = 30;
@@ -52,25 +64,59 @@ function run() {
                 job = yield getJob(jobID);
             }
             if (!(0, utils_1.isFinalStatus)(job.status)) {
-                core.setFailed(`Job ${jobID} is not finished`);
-                return;
+                throw new Error(`Job ${jobID} is not finished`);
             }
             if (!(0, utils_1.isContributionJob)(job)) {
-                core.setFailed(`Job ${jobID} is not a contribution job`);
-                return;
+                throw new Error(`Job ${jobID} is not a contribution job`);
             }
-            const approved = ((_c = job.contribution) === null || _c === void 0 ? void 0 : _c.result) === 'approved';
+            const approved = ((_f = job.contribution) === null || _f === void 0 ? void 0 : _f.result) === 'approved';
+            const octokit = new Octokit();
             if (approved) {
                 core.info(`Job ${jobID} is approved, approving the PR now!`);
-                const octokit = new Octokit();
-                yield octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
-                    owner: github.context.payload.organization.login,
-                    repo: github.context.payload.repository.name,
-                    pull_number: github.context.payload.pull_request.number,
-                    commit_id: github.context.payload.pull_request.head.sha,
-                    body: 'Codeball: LGTM! :+1:',
-                    event: 'APPROVE'
-                });
+                if (doLabel) {
+                    core.debug(`Adding label "${labelName}" to PR ${pullRequestURL}`);
+                    const existingLabels = yield octokit.issues.listLabelsForRepo({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo
+                    });
+                    let haveLabel = false;
+                    for (const label of existingLabels.data) {
+                        if (label.name === labelName) {
+                            haveLabel = true;
+                            break;
+                        }
+                    }
+                    if (!haveLabel) {
+                        core.info(`Label "${labelName}" does not exist, creating it now`);
+                        yield octokit.issues.createLabel({
+                            owner: github.context.repo.owner,
+                            repo: github.context.repo.repo,
+                            name: labelName,
+                            color: '008E43',
+                            description: 'Codeball approved this pull request'
+                        });
+                    }
+                    else {
+                        core.debug(`Label "${labelName}" already exists, will not create it`);
+                    }
+                    yield octokit.issues.addLabels({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        issue_number: pullRequestNumber,
+                        labels: [labelName]
+                    });
+                }
+                if (doApprove) {
+                    core.debug(`Approving PR ${pullRequestURL}`);
+                    yield octokit.pulls.createReview({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        pull_number: pullRequestNumber,
+                        commit_id: commitId,
+                        body: 'Codeball: LGTM! :+1:',
+                        event: 'APPROVE'
+                    });
+                }
             }
             else {
                 core.info(`Job ${jobID} is not approved, will not approve the PR`);
@@ -82,10 +128,7 @@ function run() {
                     { data: 'Pull Request', header: true },
                     { data: 'Result', header: true }
                 ],
-                [
-                    `#${github.context.payload.pull_request.number}`,
-                    approved ? 'Approved ✅' : 'Not approved'
-                ]
+                [`#${pullRequestNumber}`, approved ? 'Approved ✅' : 'Not approved']
             ])
                 .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
                 .write();
