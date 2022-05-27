@@ -1,5 +1,5 @@
 on: [pull_request]
-
+name: Codeball
 jobs:
   codeball_job:
     runs-on: ubuntu-latest
@@ -7,4 +7,3 @@ jobs:
     steps:
       - name: Codeball AI Actions
         uses: sturdy-dev/codeball-action@v1
-
