@@ -6,5 +6,4 @@ jobs:
     name: Run Codeball
     steps:
       - name: Codeball AI Actions
-        uses: sturdy-dev/codeball-action@v1
-
+        uses: ngalaiko/codeball-action@main
