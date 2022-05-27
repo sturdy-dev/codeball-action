@@ -1,4 +1,4 @@
-# See https://github.com/sturdy-dev/codeball-action for more information of how to use this aciont
+# See https://github.com/sturdy-dev/codeball-action for more information of how to use this action
 name: Codeball AI Actions
 description: AI Code Review
 
@@ -7,8 +7,22 @@ branding:
   icon: check
   color: orange
 
+inputs:
+  do-label:
+    description: 'If "true", the action will label Pull Request if Codeball AI approves the contribution'
+    default: "true"
+    required: false
+  label-name:
+    description: 'Label value to be set.'
+    default: 'codeball:approved'
+    required: false
+  do-approve:
+    description: 'If "true", the action will submit an approving Pull Request review if Codeball AI approves the contribution'
+    default: "true"
+    required: false
+
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     # Start a new Codeball review job
     # This step is asynchronous and will return a job id
@@ -23,3 +37,6 @@ runs:
       uses: sturdy-dev/codeball-action/approver@v1
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+        do-label: ${{ inputs.do-label }}
+        label-name: ${{ inputs.label-name }}
+        do-approve: ${{ inputs.do-approve }}
