@@ -56,7 +56,7 @@ function run() {
             core.info(`Do label: ${doLabel} with value: ${labelName}`);
             let job = yield getJob(jobID);
             let attempts = 0;
-            const maxAttempts = 30;
+            const maxAttempts = 60;
             while (attempts < maxAttempts && !(0, utils_1.isFinalStatus)(job.status)) {
                 attempts++;
                 core.info(`Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`);
