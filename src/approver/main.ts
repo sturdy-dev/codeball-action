@@ -40,7 +40,7 @@ async function run(): Promise<void> {
 
     let job = await getJob(jobID)
     let attempts = 0
-    const maxAttempts = 30
+    const maxAttempts = 60
     while (attempts < maxAttempts && !isFinalStatus(job.status)) {
       attempts++
       core.info(
