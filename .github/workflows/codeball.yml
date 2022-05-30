@@ -3,7 +3,32 @@ name: Codeball
 jobs:
   codeball_job:
     runs-on: ubuntu-latest
-    name: Run Codeball
+    name: Codeball
     steps:
-      - name: Codeball AI Actions
-        uses: sturdy-dev/codeball-action@v1
+      - name: Checkout source code so we can install the action locally
+        if: ${{ env.ACT }}
+        uses: actions/checkout@v2
+
+      - name: Baller (local)
+        if: ${{ env.ACT }}
+        id: codeball_baller_local
+        uses: ./baller
+
+      - name: Approver (local)
+        if: ${{ env.ACT }}
+        id: codeball_approver_local
+        uses: ./approver
+        with:
+          codeball-job-id: ${{ steps.codeball_baller_local.outputs.codeball-job-id }}
+
+      - name: Baller (v1)
+        if: ${{ !env.ACT }}
+        id: codeball_baller_v1
+        uses: sturdy-dev/codeball-action/baller@v1
+
+      - name: Approver (v1)
+        if: ${{ !env.ACT }}
+        id: codeball_approver_v1
+        uses: sturdy-dev/codeball-action/approver@v1
+        with:
+          codeball-job-id: ${{ steps.codeball_baller_v1.outputs.codeball-job-id }}

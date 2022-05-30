@@ -11,6 +11,8 @@ async function run(): Promise<void> {
   try {
     const github = require('@actions/github')
 
+    const hostName = process.env.CODEBALL_API_HOST || 'https://api.codeball.ai'
+
     const pullRequestURL = github.context.payload?.pull_request?.html_url
 
     if (!pullRequestURL) {
@@ -22,13 +24,14 @@ async function run(): Promise<void> {
 
     const data = {
       url: pullRequestURL,
-      access_token: core.getInput('GITHUB_TOKEN')
+      access_token: core.getInput('github-token')
     }
 
-    const response = await fetch('https://api.codeball.ai/jobs', {
+    const response = await fetch(`${hostName}/jobs`, {
       method: 'POST',
       body: JSON.stringify(data)
     })
+
     const resData = (await response.json()) as JobResponse
 
     core.info(`Job created: ${resData.id}`)

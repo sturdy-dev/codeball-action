@@ -1,0 +1,19 @@
+{
+  "repository": {
+    "owner": {
+      "login": "sturdy-dev"
+    },
+    "name": "test-codeball"
+  },
+  "pull_request": {
+    "html_url": "https://github.com/sturdy-dev/test-codeball/pull/12",
+    "number": 12,
+    "head": {
+      "ref": "sample-head-ref",
+      "sha": "5babb53e3087d4058acefbcd59f307f4cd59cea2"
+    },
+    "base": {
+      "ref": "sample-base-ref"
+    }
+  }
+}
