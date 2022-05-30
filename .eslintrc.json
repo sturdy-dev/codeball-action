@@ -46,7 +46,8 @@
       "@typescript-eslint/semi": ["error", "never"],
       "@typescript-eslint/type-annotation-spacing": "error",
       "@typescript-eslint/unbound-method": "error",
-      "no-console": "off"
+      "no-console": "off",
+      "import/no-commonjs": "off"
     },
     "env": {
       "node": true,

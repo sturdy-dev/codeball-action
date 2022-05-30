@@ -1,6 +1,8 @@
 import fetch from 'node-fetch'
 import {Job} from './types'
 import {isContributionJob, isFinalStatus} from './utils'
+import * as core from '@actions/core'
+import {Octokit} from '@octokit/action'
 
 async function getJob(id: string): Promise<Job> {
   const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
@@ -8,12 +10,12 @@ async function getJob(id: string): Promise<Job> {
   return data
 }
 
-async function run(): Promise<void> {
-  const core = require('@actions/core')
-  try {
-    const github = require('@actions/github')
-    const {Octokit} = require('@octokit/action')
+// The import of @actions/github must be a require to work correctly on GitHub Runners
+// import * as github from '@actions/github'
+const github = require('@actions/github')
 
+async function run(): Promise<void> {
+  try {
     const pullRequestURL = github.context.payload?.pull_request?.html_url
     if (!pullRequestURL) {
       throw new Error('No pull request URL found')
@@ -61,6 +63,7 @@ async function run(): Promise<void> {
     const approved = job.contribution?.result === 'approved'
 
     const octokit = new Octokit()
+
     if (approved) {
       core.info(`Job ${jobID} is approved, approving the PR now!`)
 
@@ -128,7 +131,16 @@ async function run(): Promise<void> {
       .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
       .write()
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) {
+      if (error.message === 'Resource not accessible by integration') {
+        core.error(
+          'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+        )
+        core.error(error)
+      } else {
+        core.setFailed(error.message)
+      }
+    }
   }
 }
 
