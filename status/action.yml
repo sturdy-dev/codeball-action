@@ -1,0 +1,19 @@
+name: 'Codeball Status'
+description: 'Codeball Status (beta)'
+
+branding:
+  icon: check
+  color: orange
+
+inputs:
+  codeball-job-id:
+    description: 'The ID of the Codeball Job created by the Baller Action'
+    required: true
+
+outputs:
+  approved:
+    description: 'If the Codeball approved the contribution (true or false)'
+
+runs:
+  using: 'node16'
+  main: '../dist/status/index.js'
