@@ -3,16 +3,13 @@ import {Job} from './types'
 import {isContributionJob, isFinalStatus} from './utils'
 import * as core from '@actions/core'
 import {Octokit} from '@octokit/action'
+import * as github from '@actions/github'
 
 async function getJob(id: string): Promise<Job> {
   const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
   const data = (await res.json()) as Job
   return data
 }
-
-// The import of @actions/github must be a require to work correctly on GitHub Runners
-// import * as github from '@actions/github'
-const github = require('@actions/github')
 
 async function run(): Promise<void> {
   try {
@@ -31,14 +28,29 @@ async function run(): Promise<void> {
       throw new Error('No commit ID found')
     }
 
+    const repoOwner = github.context.payload.repository?.owner.login
+    if (!repoOwner) {
+      throw new Error('No repo owner found')
+    }
+
+    const repoName = github.context.payload.repository?.name
+    if (!repoName) {
+      throw new Error('No repo name found')
+    }
+
     const jobID = core.getInput('codeball-job-id')
+
+    if (!jobID) {
+      throw new Error('No job ID found')
+    }
+
     const doApprove = core.getInput('do-approve') === 'true'
     const doLabel = core.getInput('do-label') === 'true'
     const labelName = core.getInput('label-name')
 
     core.info(`Job ID: ${jobID}`)
-    core.info(`Do approve: ${doApprove}`)
-    core.info(`Do label: ${doLabel} with value: ${labelName}`)
+    core.info(`Configuration: Do approve: ${doApprove}`)
+    core.info(`Configuration: Do label: ${doLabel} with value: ${labelName}`)
 
     let job = await getJob(jobID)
     let attempts = 0
@@ -71,8 +83,8 @@ async function run(): Promise<void> {
         core.debug(`Adding label "${labelName}" to PR ${pullRequestURL}`)
 
         const existingLabels = await octokit.issues.listLabelsForRepo({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo
+          owner: repoOwner,
+          repo: repoName
         })
 
         let haveLabel = false
@@ -85,30 +97,36 @@ async function run(): Promise<void> {
 
         if (!haveLabel) {
           core.info(`Label "${labelName}" does not exist, creating it now`)
-          await octokit.issues.createLabel({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
+
+          const createLabelParams = {
+            owner: repoOwner,
+            repo: repoName,
             name: labelName,
             color: '008E43',
             description: 'Codeball approved this pull request'
-          })
+          }
+
+          core.debug(`Create label: ${JSON.stringify(createLabelParams)}`)
+          await octokit.issues.createLabel(createLabelParams)
         } else {
           core.debug(`Label "${labelName}" already exists, will not create it`)
         }
 
-        await octokit.issues.addLabels({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+        const addLabelParams = {
+          owner: repoOwner,
+          repo: repoName,
           issue_number: pullRequestNumber,
           labels: [labelName]
-        })
+        }
+
+        core.debug(`Add label: ${JSON.stringify(addLabelParams)}`)
+        await octokit.issues.addLabels(addLabelParams)
       }
 
       if (doApprove) {
-        core.debug(`Approving PR ${pullRequestURL}`)
         await octokit.pulls.createReview({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+          owner: repoOwner,
+          repo: repoName,
           pull_number: pullRequestNumber,
           commit_id: commitId,
           body: 'Codeball: LGTM! :+1:',
@@ -119,17 +137,20 @@ async function run(): Promise<void> {
       core.info(`Job ${jobID} is not approved, will not approve the PR`)
     }
 
-    await core.summary
-      .addHeading('Codeball')
-      .addTable([
-        [
-          {data: 'Pull Request', header: true},
-          {data: 'Result', header: true}
-        ],
-        [`#${pullRequestNumber}`, approved ? 'Approved ✅' : 'Not approved']
-      ])
-      .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
-      .write()
+    // Create summary if available
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      await core.summary
+        .addHeading('Codeball')
+        .addTable([
+          [
+            {data: 'Pull Request', header: true},
+            {data: 'Result', header: true}
+          ],
+          [`#${pullRequestNumber}`, approved ? 'Approved ✅' : 'Not approved']
+        ])
+        .addLink('View on web', `https://codeball.ai/prediction/${jobID}`)
+        .write()
+    }
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'Resource not accessible by integration') {
