@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import {Job} from './types'
 import {isContributionJob, isFinalStatus} from './utils'
 import * as core from '@actions/core'
-import {Octokit} from '@octokit/action'
 import * as github from '@actions/github'
+import {Octokit} from './octokit'
 
 async function getJob(id: string): Promise<Job> {
   const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
@@ -39,9 +39,14 @@ async function run(): Promise<void> {
     }
 
     const jobID = core.getInput('codeball-job-id')
-
     if (!jobID) {
       throw new Error('No job ID found')
+    }
+
+    const githubToken = core.getInput('GITHUB_TOKEN')
+    if (!githubToken) {
+      core.setFailed('No GITHUB_TOKEN found')
+      return
     }
 
     const doApprove = core.getInput('do-approve') === 'true'
@@ -74,7 +79,7 @@ async function run(): Promise<void> {
 
     const approved = job.contribution?.result === 'approved'
 
-    const octokit = new Octokit()
+    const octokit = new Octokit({auth: githubToken})
 
     if (approved) {
       core.info(`Job ${jobID} is approved, approving the PR now!`)
