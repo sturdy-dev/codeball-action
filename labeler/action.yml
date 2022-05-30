@@ -1,5 +1,5 @@
-name: 'Codeball Approver'
-description: 'Codeball Approver (beta)'
+name: 'Codeball Labeler'
+description: 'Codeball Labeler (beta)'
 
 branding:
   icon: check
@@ -10,11 +10,18 @@ inputs:
     description: 'Default to {{ github.token }}. This is the default GitHub token available to actions and is used to run Codeball and to post the result. The default token permissions (https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#permissions) work fine.'
     default: '${{ github.token }}'
     required: false
-  message:
-    description: 'The message to send in the code review comment.'
-    default: "Codeball: LGTM! :+1:"
+  name:
+    description: "The name of the label. Will be created if it does not exist."
+    required: true
+  color:
+    description: "The color of the label."
+    default: "008E43"
+    required: false
+  description:
+    description: "The description of the label."
+    default: "Codeball"
     required: false
 
 runs:
   using: 'node16'
-  main: '../dist/approver/index.js'
+  main: '../dist/labeler/index.js'

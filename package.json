@@ -10,7 +10,9 @@
     "lint": "eslint src/**/*.ts",
     "package-baller": "ncc build lib/baller/main.js --out dist/baller --source-map --license licenses.txt",
     "package-approver": "ncc build lib/approver/main.js --out dist/approver --source-map --license licenses.txt",
-    "package": "yarn package-baller && yarn package-approver",
+    "package-status": "ncc build lib/status/main.js --out dist/status --source-map --license licenses.txt",
+    "package-labeler": "ncc build lib/labeler/main.js --out dist/labeler --source-map --license licenses.txt",
+    "package": "yarn package-baller && yarn package-approver && yarn package-status && yarn package-labeler",
     "test": "jest",
     "all": "yarn build && yarn format && yarn lint && yarn package"
   },
