@@ -6,6 +6,29 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -21,6 +44,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
 const utils_1 = __nccwpck_require__(9465);
+const core = __importStar(__nccwpck_require__(2186));
+const action_1 = __nccwpck_require__(1231);
 function getJob(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const res = yield (0, node_fetch_1.default)(`https://api.codeball.ai/jobs/${id}`);
@@ -28,13 +53,13 @@ function getJob(id) {
         return data;
     });
 }
+// The import of @actions/github must be a require to work correctly on GitHub Runners
+// import * as github from '@actions/github'
+const github = __nccwpck_require__(5438);
 function run() {
     var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
-        const core = __nccwpck_require__(2186);
         try {
-            const github = __nccwpck_require__(5438);
-            const { Octokit } = __nccwpck_require__(1231);
             const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
             if (!pullRequestURL) {
                 throw new Error('No pull request URL found');
@@ -70,7 +95,7 @@ function run() {
                 throw new Error(`Job ${jobID} is not a contribution job`);
             }
             const approved = ((_f = job.contribution) === null || _f === void 0 ? void 0 : _f.result) === 'approved';
-            const octokit = new Octokit();
+            const octokit = new action_1.Octokit();
             if (approved) {
                 core.info(`Job ${jobID} is approved, approving the PR now!`);
                 if (doLabel) {
@@ -134,8 +159,15 @@ function run() {
                 .write();
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+            if (error instanceof Error) {
+                if (error.message === 'Resource not accessible by integration') {
+                    core.error('Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
+                    core.error(error);
+                }
+                else {
+                    core.setFailed(error.message);
+                }
+            }
         }
     });
 }
