@@ -1,6 +1,6 @@
 ![github_bg](https://user-images.githubusercontent.com/47952/170700847-bb0cac65-f269-4758-955a-632c48f47290.png)
 
-# Codeball &mdash; AI Code Review
+# CODEBALL &mdash; AI CODE REVIEW 🔮
 
 Codeball is a code review AI which approves Pull Requests that a human would have approved. Spend less time waiting, save time and money.
 
