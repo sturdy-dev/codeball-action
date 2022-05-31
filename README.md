@@ -20,14 +20,10 @@ on: [pull_request]
 jobs:
   codeball_job:
     runs-on: ubuntu-latest
-    name: Run Codeball
+    name: Codeball
     steps:
-      - name: Codeball AI Actions
+      - name: Codeball
         uses: sturdy-dev/codeball-action@v2
-        # with:
-        #   do-label: "true"                    # Configure if the action should label approved contributions
-        #   label-name: "codeball:approved"     # Configure the label name to set if Codeball approves the contribution
-        #   do-approve: "true"                  # Configure if the action should approve PRs that have been approved by Codeball
 ```
 
 2. 🎉 That's it! Codeball will now run on your pull requests, and will pre-approve your PR if it's a good one!
@@ -36,19 +32,12 @@ jobs:
 
 Codeball Actions are built on multiple smaller building-blocks, that are heavily configurable through GitHub Actions.
 
-The Codeball sub-actions are:
-
-* Baller – Triggers new Codeball Jobs
-* Status – Waits for the the Codeball result
-* Approver – Approves PRs
-* Labeler – Adds labels to PRs
-
 ### Example: "Dry-run" mode, labels all PRs with the Codeball Result
 
 <details>
-  <summary>examples/codeball-dry-run.yml</summary>
+  <summary>codeball-dry-run.yml</summary>
   
-```
+```yaml
 on: [pull_request]
 
 permissions:
@@ -98,9 +87,9 @@ jobs:
 ### Example: Approve only (no labels)
 
 <details>
-  <summary>examples/codeball-approve.yml</summary>
+  <summary>codeball-approve.yml</summary>
   
-```
+```yaml
 on: [pull_request]
 
 permissions:
@@ -141,9 +130,9 @@ jobs:
 ### Example: Filter files (run only for PRs modifying a single service)
 
 <details>
-  <summary>examples/codeball-filter-files.yml</summary>
+  <summary>codeball-filter-files.yml</summary>
   
-```
+```yaml
 on:
   pull_request:
     # Run Codeball only if files under "/web/" has been modified (and no other files)
@@ -186,6 +175,16 @@ jobs:
           message: "Codeball: LGTM! :+1:"
 ```
 </details>
+
+
+## Building Blocks
+
+The Codeball sub-actions are:
+
+* `sturdy-dev/codeball-action/baller/@v2` – Triggers new Codeball Jobs
+* `sturdy-dev/codeball-action/status/@v2` – Waits for the the Codeball result
+* `sturdy-dev/codeball-action/approver/@v2` – Approves PRs
+* `sturdy-dev/codeball-action/labeler/@v2` – Adds labels to PRs
 
 ## Troubleshooting
 
