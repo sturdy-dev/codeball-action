@@ -1,42 +1,38 @@
 # See https://github.com/sturdy-dev/codeball-action for more information of how to use this action
 name: Codeball AI Actions
-description: AI Code Review
+description: AI Code Review – Codeball approves Pull Requests that a human would have approved. Wait less for review, save time and $$$.
 
 author: Sturdy
 branding:
   icon: check
   color: orange
 
-inputs:
-  do-label:
-    description: 'If "true", the action will label Pull Request if Codeball AI approves the contribution'
-    default: "true"
-    required: false
-  label-name:
-    description: 'Label value to be set.'
-    default: 'codeball:approved'
-    required: false
-  do-approve:
-    description: 'If "true", the action will submit an approving Pull Request review if Codeball AI approves the contribution'
-    default: "true"
-    required: false
-
 runs:
   using: 'composite'
   steps:
+
     # Start a new Codeball review job
     # This step is asynchronous and will return a job id
     - name: Trigger Codeball
       id: codeball_baller
-      uses: sturdy-dev/codeball-action/baller@v1
+      uses: sturdy-dev/codeball-action/baller@v2
 
-    # Wait for the codeball_baller job to complete
-    # Approves the Pull Request if Codeball approves it
-    - name: Codeball Approver
-      id: codeball_approver
-      uses: sturdy-dev/codeball-action/approver@v1
+    # Wait for Codeball to return the status
+    - name: Get Status
+      id: codeball_status
+      uses: sturdy-dev/codeball-action/status@v2
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-        do-label: ${{ inputs.do-label }}
-        label-name: ${{ inputs.label-name }}
-        do-approve: ${{ inputs.do-approve }}
+
+    # If Codeball approved the contribution, add a "codeball:approved" label
+    - name: Label Approved
+      uses: sturdy-dev/codeball-action/labeler@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+      with:
+        name: "codeball:approved"
+        color: "86efac" # green
+
+    # If Codeball approved the contribution, approve the PR
+    - name: Approve PR
+      uses: sturdy-dev/codeball-action/approver@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
