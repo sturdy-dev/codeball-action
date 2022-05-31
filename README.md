@@ -181,10 +181,10 @@ jobs:
 
 The Codeball sub-actions are:
 
-* `sturdy-dev/codeball-action/baller/@v2` – Triggers new Codeball Jobs
-* `sturdy-dev/codeball-action/status/@v2` – Waits for the the Codeball result
-* `sturdy-dev/codeball-action/approver/@v2` – Approves PRs
-* `sturdy-dev/codeball-action/labeler/@v2` – Adds labels to PRs
+* [`sturdy-dev/codeball-action/baller/@v2`](./baller/README.md) – Triggers new Codeball Jobs
+* [`sturdy-dev/codeball-action/status/@v2`](./status/README.md) – Waits for the the Codeball result
+* [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) – Approves PRs
+* [`sturdy-dev/codeball-action/labeler/@v2`](./labeler/README.md) – Adds labels to PRs
 
 ## Troubleshooting
 
