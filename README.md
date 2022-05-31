@@ -1,10 +1,14 @@
 ![github_bg](https://user-images.githubusercontent.com/47952/170700847-bb0cac65-f269-4758-955a-632c48f47290.png)
 
-# Codeball Actions &mdash; AI-POWERED CODE REVIEW
+# Codeball &mdash; AI Code Review
 
-> It approves Pull Requests that a human would have approved. Wait less for review, save time and $$$.
+Codeball is a code review AI which approves Pull Requests that a human would have approved. Spend less time waiting, save time and money.
 
-The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if Codeball approves it.
+The AI identifies and approves the bulk of safe contributions, so that you get to focus your energy on the tricky ones.
+
+## GitHub Action
+
+The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if the model classifies it as safe.
 
 - [Online Demo](https://codeball.ai/)
 - [How Codeball Works](https://codeball.ai/how)
@@ -185,6 +189,17 @@ The Codeball sub-actions are:
 * [`sturdy-dev/codeball-action/status/@v2`](./status/README.md) – Waits for the the Codeball result
 * [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) – Approves PRs
 * [`sturdy-dev/codeball-action/labeler/@v2`](./labeler/README.md) – Adds labels to PRs
+
+## How Codeball works
+
+Codeball uses a deep learning model that has been trained on over 1 million pull requests. For each contribution it takes in hundreds of inputs, for example:
+
+- The code diffs (perceptual hashes)
+- The author's recent experience with the affected files
+- The change frequency of the affected files
+- Past code reversals / fix-ups
+
+Codeball is optimized for precision, which means it only approves code that it's really confident in.
 
 ## Troubleshooting
 
