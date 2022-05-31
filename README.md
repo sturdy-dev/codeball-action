@@ -46,13 +46,145 @@ The Codeball sub-actions are:
 ### Example: "Dry-run" mode, labels all PRs with the Codeball Result
 
 <details>
-  <summary>codeball.yml</summary>
+  <summary>examples/codeball-dry-run.yml</summary>
   
-  ## Heading
-  1. A numbered
-  2. list
-     * With some
-     * Sub bullets
+```
+on: [pull_request]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  codeball:
+    runs-on: ubuntu-latest
+    name: Codeball
+    steps:
+
+      # Start a new Codeball review job
+      # This step is asynchronous and will return a job id
+      - name: Trigger Codeball
+        id: codeball_baller
+        uses: sturdy-dev/codeball-action/baller@v2
+
+
+      # Wait for Codeball to return the status
+      - name: Get Status
+        id: codeball_status
+        uses: sturdy-dev/codeball-action/status@v2
+        with:
+          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+      # If Codeball approved the contribution, add a "codeball:approved" label
+      - name: Label Approved
+        uses: sturdy-dev/codeball-action/labeler@v2
+        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+        with:
+          name: "codeball:approved"
+          color: "86efac" # green
+
+      # If Codeball did not approve the contribution, add a "codeball:needs-review" label
+      - name: Label Needs Review
+        uses: sturdy-dev/codeball-action/labeler@v2
+        if: ${{ steps.codeball_status.outputs.approved == 'false' }}
+        with:
+          name: "codeball:needs-review"
+          color: "bfdbfe" # blue
+
+```
+</details>
+
+### Example: Approve only (no labels)
+
+<details>
+  <summary>examples/codeball-approve.yml</summary>
+  
+```
+on: [pull_request]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  codeball:
+    runs-on: ubuntu-latest
+    name: Codeball
+    steps:
+
+      # Start a new Codeball review job
+      # This step is asynchronous and will return a job id
+      - name: Trigger Codeball
+        id: codeball_baller
+        uses: sturdy-dev/codeball-action/baller@v2
+
+
+      # Wait for Codeball to return the status
+      - name: Get Status
+        id: codeball_status
+        uses: sturdy-dev/codeball-action/status@v2
+        with:
+          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+      # If Codeball approved the contribution, approve the PR
+      - name: Approve PR
+        uses: sturdy-dev/codeball-action/approver@v2
+        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+        with:
+          message: "Codeball: LGTM! :+1:"
+```
+</details>
+
+
+### Example: Filter files (run only for PRs modifying a single service)
+
+<details>
+  <summary>examples/codeball-filter-files.yml</summary>
+  
+```
+on:
+  pull_request:
+    # Run Codeball only if files under "/web/" has been modified (and no other files)
+    # See: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-including-and-excluding-paths
+    paths:
+      - '!**'
+      - '/web/**'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  codeball:
+    runs-on: ubuntu-latest
+    name: Codeball
+
+    steps:
+
+      # Start a new Codeball review job
+      # This step is asynchronous and will return a job id
+      - name: Trigger Codeball
+        id: codeball_baller
+        uses: sturdy-dev/codeball-action/baller@v2
+
+
+      # Wait for Codeball to return the status
+      - name: Get Status
+        id: codeball_status
+        uses: sturdy-dev/codeball-action/status@v2
+        with:
+          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+      # If Codeball approved the contribution, approve the PR
+      - name: Approve PR
+        uses: sturdy-dev/codeball-action/approver@v2
+        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+        with:
+          message: "Codeball: LGTM! :+1:"
+```
 </details>
 
 ## Troubleshooting
