@@ -30,15 +30,19 @@ const handleResponse = async (response: Response): Promise<any> => {
 
 export const get = async (path: string) =>
 	fetch(new URL(path, BASE_URL).toString(), {
-		redirect: 'follow'
+		headers: {
+            'User-Agent': 'github-actions',
+		},
+        redirect: 'follow',
 	}).then(handleResponse);
 
 export const post = async (path: string, body: any) =>
 	fetch(new URL(path, BASE_URL).toString(), {
 		method: 'POST',
-		redirect: 'follow',
+		body: JSON.stringify(body),
 		headers: {
+            'User-Agent': 'github-actions',
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify(body)
+        redirect: 'follow',
 	}).then(handleResponse);
