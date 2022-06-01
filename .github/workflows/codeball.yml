@@ -2,33 +2,41 @@ on: [pull_request]
 name: Codeball
 jobs:
   codeball_job:
+    if: ${{ !env.ACT }}
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-      - name: Checkout source code so we can install the action locally
-        if: ${{ env.ACT }}
-        uses: actions/checkout@v2
+    
+    # Start a new Codeball review job
+    # This step is asynchronous and will return a job id
+    - name: Trigger Codeball
+      id: codeball_baller
+      uses: sturdy-dev/codeball-action/baller@v2
 
-      - name: Baller (local)
-        if: ${{ env.ACT }}
-        id: codeball_baller_local
-        uses: ./baller
+    # Wait for Codeball to return the status
+    - name: Get Status
+      id: codeball_status
+      uses: sturdy-dev/codeball-action/status@v2
+      with:
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
-      - name: Approver (local)
-        if: ${{ env.ACT }}
-        id: codeball_approver_local
-        uses: ./approver
-        with:
-          codeball-job-id: ${{ steps.codeball_baller_local.outputs.codeball-job-id }}
+    # If Codeball approved the contribution, add a "codeball:approved" label
+    - name: Label Approved
+      uses: sturdy-dev/codeball-action/labeler@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+      with:
+        name: "codeball:approved"
+        color: "86efac" # green
 
-      - name: Baller (v1)
-        if: ${{ !env.ACT }}
-        id: codeball_baller_v1
-        uses: sturdy-dev/codeball-action/baller@v1
+    # If Codeball did not approve the contribution, add a "codeball:needs-review" label
+    - name: Label Approved
+      uses: sturdy-dev/codeball-action/labeler@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'false' }}
+      with:
+        name: "codeball:needs-review"
+        color: "bfdbfe" # blue
 
-      - name: Approver (v1)
-        if: ${{ !env.ACT }}
-        id: codeball_approver_v1
-        uses: sturdy-dev/codeball-action/approver@v1
-        with:
-          codeball-job-id: ${{ steps.codeball_baller_v1.outputs.codeball-job-id }}
+    # If Codeball approved the contribution, approve the PR
+    - name: Approve PR
+      uses: sturdy-dev/codeball-action/approver@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}

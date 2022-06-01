@@ -1,10 +1,14 @@
 ![github_bg](https://user-images.githubusercontent.com/47952/170700847-bb0cac65-f269-4758-955a-632c48f47290.png)
 
-# Codeball Actions &mdash; AI-POWERED CODE REVIEW
+# CODEBALL &mdash; AI CODE REVIEW 🔮
 
-> It approves Pull Requests that a human would have approved. Wait less for review, save time and $$$.
+Codeball is a code review AI which approves Pull Requests that a human would have approved. Spend less time waiting, save time and money.
 
-The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if Codeball approves it.
+The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
+
+## GitHub Action
+
+The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if the model classifies it as safe.
 
 - [Online Demo](https://codeball.ai/)
 - [How Codeball Works](https://codeball.ai/how)
@@ -26,7 +30,7 @@ jobs:
         uses: sturdy-dev/codeball-action@v2
 ```
 
-2. 🎉 That's it! Codeball will now run on your pull requests, and will pre-approve your PR if it's a good one!
+2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
 
 ## Customizations
 
@@ -186,13 +190,24 @@ The Codeball sub-actions are:
 * [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) – Approves PRs
 * [`sturdy-dev/codeball-action/labeler/@v2`](./labeler/README.md) – Adds labels to PRs
 
+## How Codeball works
+
+Codeball uses a deep learning model that has been trained on over 1 million Pull Requests. For each contribution it considers in hundreds of inputs, including:
+
+- The code diffs (perceptual hashes)
+- The author's recent experience with the affected files
+- The change frequency of the affected files
+- Past code reversals / fix-ups
+
+Codeball is optimized for precision, which means it only approves contributions that it's really confident in.
+
 ## Troubleshooting
 
 ### Permissions
 
 Codeball works out of the box with GitHub Actions. 
 
-If you're using non-default permissions, or want to use a custom access token. Make sure that you're running Codeball with the follwing permissions:
+If you're using non-default permissions, or want to use a custom access token. Make sure that you're running Codeball with the following permissions:
 
 ```yaml
 permissions:

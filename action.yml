@@ -1,6 +1,6 @@
 # See https://github.com/sturdy-dev/codeball-action for more information of how to use this action
-name: Codeball AI Actions
-description: AI Code Review – Codeball approves Pull Requests that a human would have approved. Wait less for review, save time and $$$.
+name: Codeball AI Code Review
+description: AI Code Review – Codeball approves Pull Requests that a human would have approved. Wait less for review, save time and money.
 
 author: Sturdy
 branding:
