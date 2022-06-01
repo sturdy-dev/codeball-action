@@ -14,6 +14,9 @@ inputs:
     description: 'The message to send in the code review comment.'
     default: "Codeball: LGTM! :+1:"
     required: false
+  codeball-job-id:
+    description: 'The ID of the Codeball Job created by the Baller Action'
+    required: false
 
 runs:
   using: 'node16'

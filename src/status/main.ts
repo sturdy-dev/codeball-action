@@ -1,5 +1,6 @@
 import {isContributionJob, isFinalStatus, get} from '../lib'
 import * as core from '@actions/core'
+import {track} from '../lib/track/track'
 
 async function run(): Promise<void> {
   try {
@@ -40,6 +41,8 @@ async function run(): Promise<void> {
     }
 
     core.setOutput('approved', false)
+
+    await track(jobID, 'status')
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)
