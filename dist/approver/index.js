@@ -63624,6 +63624,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const lib_1 = __nccwpck_require__(6791);
+const track_1 = __nccwpck_require__(1263);
 function run() {
     var _a, _b, _c, _d, _e, _f, _g;
     return __awaiter(this, void 0, void 0, function* () {
@@ -63653,6 +63654,7 @@ function run() {
                 core.setFailed('No GITHUB_TOKEN found');
                 return;
             }
+            const jobID = core.getInput('codeball-job-id'); // jobID is not required
             const octokit = new lib_1.Octokit({ auth: githubToken });
             yield octokit.pulls.createReview({
                 owner: repoOwner,
@@ -63662,6 +63664,7 @@ function run() {
                 body: 'Codeball: LGTM! :+1:',
                 event: 'APPROVE'
             });
+            yield (0, track_1.track)(jobID, 'approver');
         }
         catch (error) {
             if (error instanceof Error) {
@@ -63874,6 +63877,34 @@ function getApiBaseUrl() {
     /* istanbul ignore next */
     return process.env['GITHUB_API_URL'] || 'https://api.github.com';
 }
+
+
+/***/ }),
+
+/***/ 1263:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.track = void 0;
+const api_1 = __nccwpck_require__(9095);
+const track = (jobID, actionName) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, api_1.post)("/track", {
+        job_id: jobID,
+        name: actionName,
+    });
+});
+exports.track = track;
 
 
 /***/ }),
