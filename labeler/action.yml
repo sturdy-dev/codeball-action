@@ -21,6 +21,9 @@ inputs:
     description: "The description of the label."
     default: "Codeball"
     required: false
+  codeball-job-id:
+    description: 'The ID of the Codeball Job created by the Baller Action'
+    required: false
 
 runs:
   using: 'node16'

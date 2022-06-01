@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Octokit} from '../lib'
+import {track} from '../lib/track/track'
 
 async function run(): Promise<void> {
   try {
@@ -35,6 +36,8 @@ async function run(): Promise<void> {
       return
     }
 
+    const jobID = core.getInput('codeball-job-id') // jobID is not required
+
     const octokit = new Octokit({auth: githubToken})
 
     await octokit.pulls.createReview({
@@ -45,6 +48,8 @@ async function run(): Promise<void> {
       body: 'Codeball: LGTM! :+1:',
       event: 'APPROVE'
     })
+
+    await track(jobID, 'approver')
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'Resource not accessible by integration') {
