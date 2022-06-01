@@ -2,7 +2,7 @@ on: [pull_request]
 name: Codeball (Local Testing) 
 jobs:
   codeball_job_local_tetsing:
-    if: ${{ env.ACT }}
+    if: github.repository == 'sturdy-dev/test-codeball'
     runs-on: ubuntu-latest
     name: Codeball
     steps:
