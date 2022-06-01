@@ -1,12 +1,5 @@
-import fetch from 'node-fetch'
-import {Job, isContributionJob, isFinalStatus} from '../lib'
+import {isContributionJob, isFinalStatus, get} from '../lib'
 import * as core from '@actions/core'
-
-async function getJob(id: string): Promise<Job> {
-  const res = await fetch(`https://api.codeball.ai/jobs/${id}`)
-  const data = (await res.json()) as Job
-  return data
-}
 
 async function run(): Promise<void> {
   try {
@@ -17,7 +10,7 @@ async function run(): Promise<void> {
 
     core.info(`Job ID: ${jobID}`)
 
-    let job = await getJob(jobID)
+    let job = await get(jobID)
     let attempts = 0
     const maxAttempts = 60
     while (attempts < maxAttempts && !isFinalStatus(job.status)) {
@@ -26,7 +19,7 @@ async function run(): Promise<void> {
         `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
       )
       await new Promise(resolve => setTimeout(resolve, 5000))
-      job = await getJob(jobID)
+      job = await get(jobID)
     }
 
     if (!isFinalStatus(job.status)) {
