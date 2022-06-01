@@ -8,8 +8,7 @@ git merge main --no-edit
 
 # Build
 yarn build
-yarn package
-git add lib dist || true
+git add dist || true
 git commit -m "Build action" --allow-empty
 
 # Push
