@@ -1,0 +1,27 @@
+on: [pull_request]
+name: Codeball (Local Testing) 
+jobs:
+  codeball_job_local_tetsing:
+    if: github.repository == 'sturdy-dev/test-codeball'
+    runs-on: ubuntu-latest
+    name: Codeball
+    steps:
+    - name: Checkout source code so we can install the action locally
+      uses: actions/checkout@v2
+    - name: Trigger Codeball
+      id: codeball_baller
+      uses: ./baller
+    - name: Get Status
+      id: codeball_status
+      uses: ./status
+      with:
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+    - name: Label Approved
+      uses: ./labeler
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+      with:
+        name: "codeball-tests:approved"
+        color: "86efac"
+    - name: Approve PR
+      uses: ./approver
+      if: ${{ steps.codeball_status.outputs.approved == 'true' }}

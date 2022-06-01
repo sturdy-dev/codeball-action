@@ -4,17 +4,16 @@
   "description": "",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn baller:build && yarn approver:build && yarn status:build && yarn labeler:build",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
-    "package-baller": "ncc build lib/baller/main.js --out dist/baller --source-map --license licenses.txt",
-    "package-approver": "ncc build lib/approver/main.js --out dist/approver --source-map --license licenses.txt",
-    "package-status": "ncc build lib/status/main.js --out dist/status --source-map --license licenses.txt",
-    "package-labeler": "ncc build lib/labeler/main.js --out dist/labeler --source-map --license licenses.txt",
-    "package": "yarn package-baller && yarn package-approver && yarn package-status && yarn package-labeler",
+    "baller:build": "ncc build src/baller/main.ts --out dist/baller --source-map --license licenses.txt",
+    "approver:build": "ncc build src/approver/main.ts --out dist/approver --source-map --license licenses.txt",
+    "status:build": "ncc build src/status/main.ts --out dist/status --source-map --license licenses.txt",
+    "labeler:build": "ncc build src/labeler/main.ts --out dist/labeler --source-map --license licenses.txt",
     "test": "jest",
-    "all": "yarn build && yarn format && yarn lint && yarn package"
+    "all": "yarn format && yarn lint && yarn build"
   },
   "repository": {
     "type": "git",
