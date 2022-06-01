@@ -1,6 +1,5 @@
 import fetch from 'node-fetch'
-import {Job} from './types'
-import {isContributionJob, isFinalStatus} from './utils'
+import {Job, isContributionJob, isFinalStatus} from '../lib'
 import * as core from '@actions/core'
 
 async function getJob(id: string): Promise<Job> {
