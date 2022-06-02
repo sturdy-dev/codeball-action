@@ -39,7 +39,7 @@ Codeball Actions are built on multiple smaller building-blocks, that are heavily
 ### Example: "Dry-run" mode, labels all PRs with the Codeball Result
 
 <details>
-  <summary>codeball-dry-run.yml</summary>
+  <summary>▶️ codeball-dry-run.yml</summary>
   
 ```yaml
 on: [pull_request]
@@ -91,7 +91,7 @@ jobs:
 ### Example: Approve only (no labels)
 
 <details>
-  <summary>codeball-approve.yml</summary>
+  <summary>▶️ codeball-approve.yml</summary>
   
 ```yaml
 on: [pull_request]
@@ -134,7 +134,7 @@ jobs:
 ### Example: Filter files (run only for PRs modifying a single service)
 
 <details>
-  <summary>codeball-filter-files.yml</summary>
+  <summary>▶️ codeball-filter-files.yml</summary>
   
 ```yaml
 on:
