@@ -7,32 +7,34 @@ const isApproved = (job: Job): boolean =>
   isContributionJob(job) &&
   job.contribution?.result === 'approved'
 
-async function run(): Promise<void> {
-  try {
-    const jobID = required('codeball-job-id')
+const run = async (jobID: string): Promise<boolean> => {
+  core.info(`Job ID: ${jobID}`)
 
-    core.info(`Job ID: ${jobID}`)
-
-    let job = await get(jobID)
-    let attempts = 0
-    const maxAttempts = 60
-    while (attempts < maxAttempts && !isFinalStatus(job.status)) {
-      attempts++
-      core.info(
-        `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
-      )
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      job = await get(jobID)
-    }
-
-    core.setOutput('approved', isApproved(job))
-
-    track({jobID, actionName: 'status'})
-  } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message)
-    }
+  let job = await get(jobID)
+  let attempts = 0
+  const maxAttempts = 60
+  while (attempts < maxAttempts && !isFinalStatus(job.status)) {
+    attempts++
+    core.info(
+      `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
+    )
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    job = await get(jobID)
   }
+
+  return isApproved(job)
 }
 
-run()
+const jobID = required('codeball-job-id')
+
+run(jobID)
+  .then(isApproved => {
+    track({jobID, actionName: 'status'})
+    core.setOutput('approved', isApproved)
+  })
+  .catch(error => {
+    if (error instanceof Error) {
+      track({jobID, actionName: 'status', error: error.message})
+      core.setFailed(error.message)
+    }
+  })
