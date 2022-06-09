@@ -63657,7 +63657,7 @@ function run() {
     });
 }
 run()
-    .then(() => (0, track_1.track)({ jobID, actionName: 'approver' }))
+    .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'approver' }); }))
     .catch(error => {
     if (error instanceof Error) {
         (0, track_1.track)({ jobID, actionName: 'approver', error: error.message });

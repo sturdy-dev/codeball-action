@@ -63644,16 +63644,16 @@ function run() {
     });
 }
 run()
-    .then(({ jobId }) => {
-    (0, track_1.track)({ jobID: jobId, actionName: 'baller' });
+    .then(({ jobId }) => __awaiter(void 0, void 0, void 0, function* () {
+    yield (0, track_1.track)({ jobID: jobId, actionName: 'baller' });
     core.setOutput('codeball-job-id', jobId);
-})
-    .catch(error => {
-    (0, track_1.track)({ actionName: 'baller', error: error.message });
+}))
+    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
+    yield (0, track_1.track)({ actionName: 'baller', error: error.message });
     if (error instanceof Error) {
         core.setFailed(error.message);
     }
-});
+}));
 
 
 /***/ }),

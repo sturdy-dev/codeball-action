@@ -63724,16 +63724,16 @@ const run = (jobID) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const jobID = (0, lib_1.required)('codeball-job-id');
 run(jobID)
-    .then(isApproved => {
-    (0, track_1.track)({ jobID, actionName: 'status' });
-    core.setOutput('approved', isApproved);
-})
-    .catch(error => {
+    .then((approved) => __awaiter(void 0, void 0, void 0, function* () {
+    yield (0, track_1.track)({ jobID, actionName: 'status' });
+    core.setOutput('approved', approved);
+}))
+    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
-        (0, track_1.track)({ jobID, actionName: 'status', error: error.message });
+        yield (0, track_1.track)({ jobID, actionName: 'status', error: error.message });
         core.setFailed(error.message);
     }
-});
+}));
 
 
 /***/ }),

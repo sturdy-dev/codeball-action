@@ -63685,10 +63685,10 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     yield octokit.issues.addLabels(addLabelParams);
 });
 run()
-    .then(() => (0, track_1.track)({ jobID, actionName: 'labeler' }))
-    .catch(error => {
+    .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'labeler' }); }))
+    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
-        (0, track_1.track)({ jobID, actionName: 'labeler', error: error.message });
+        yield (0, track_1.track)({ jobID, actionName: 'labeler', error: error.message });
         if (error.message === 'Resource not accessible by integration') {
             core.setFailed('Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
         }
@@ -63696,7 +63696,7 @@ run()
             core.setFailed(error.message);
         }
     }
-});
+}));
 
 
 /***/ }),
