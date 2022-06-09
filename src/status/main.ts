@@ -1,53 +1,40 @@
-import {isContributionJob, isFinalStatus, get} from '../lib'
+import {isContributionJob, isFinalStatus, get, required, Job} from '../lib'
 import * as core from '@actions/core'
 import {track} from '../lib/track/track'
 
-async function run(): Promise<void> {
-  try {
-    const jobID = core.getInput('codeball-job-id')
-    if (!jobID) {
-      throw new Error('No job ID found')
-    }
+const isApproved = (job: Job): boolean =>
+  isFinalStatus(job.status) &&
+  isContributionJob(job) &&
+  job.contribution?.result === 'approved'
 
-    core.info(`Job ID: ${jobID}`)
+const run = async (jobID: string): Promise<boolean> => {
+  core.info(`Job ID: ${jobID}`)
 
-    let job = await get(jobID)
-    let attempts = 0
-    const maxAttempts = 60
-    while (attempts < maxAttempts && !isFinalStatus(job.status)) {
-      attempts++
-      core.info(
-        `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
-      )
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      job = await get(jobID)
-    }
-
-    if (!isFinalStatus(job.status)) {
-      core.setOutput('approved', false)
-      return
-    }
-
-    if (!isContributionJob(job)) {
-      core.setOutput('approved', false)
-      return
-    }
-
-    const approved = job.contribution?.result === 'approved'
-
-    if (approved) {
-      core.setOutput('approved', true)
-      return
-    }
-
-    core.setOutput('approved', false)
-
-    await track(jobID, 'status')
-  } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message)
-    }
+  let job = await get(jobID)
+  let attempts = 0
+  const maxAttempts = 60
+  while (attempts < maxAttempts && !isFinalStatus(job.status)) {
+    attempts++
+    core.info(
+      `Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`
+    )
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    job = await get(jobID)
   }
+
+  return isApproved(job)
 }
 
-run()
+const jobID = required('codeball-job-id')
+
+run(jobID)
+  .then(isApproved => {
+    track({jobID, actionName: 'status'})
+    core.setOutput('approved', isApproved)
+  })
+  .catch(error => {
+    if (error instanceof Error) {
+      track({jobID, actionName: 'status', error: error.message})
+      core.setFailed(error.message)
+    }
+  })
