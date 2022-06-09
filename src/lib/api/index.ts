@@ -46,3 +46,5 @@ export const post = async (path: string, body: any) =>
 		},
         redirect: 'follow',
 	}).then(handleResponse);
+
+// test
