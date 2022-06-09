@@ -45,8 +45,11 @@ runs:
       with:
         name: ${{ inputs.label-name }}
         color: "86efac" # green
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
       uses: sturdy-dev/codeball-action/approver@v2
       if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.do-approve == 'true' }}
+      with:
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
