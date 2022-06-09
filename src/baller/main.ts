@@ -22,12 +22,12 @@ async function run(): Promise<{jobId: string}> {
 }
 
 run()
-  .then(({jobId}) => {
-    track({jobID: jobId, actionName: 'baller'})
+  .then(async ({jobId}) => {
+    await track({jobID: jobId, actionName: 'baller'})
     core.setOutput('codeball-job-id', jobId)
   })
-  .catch(error => {
-    track({actionName: 'baller', error: error.message})
+  .catch(async error => {
+    await track({actionName: 'baller', error: error.message})
     if (error instanceof Error) {
       core.setFailed(error.message)
     }

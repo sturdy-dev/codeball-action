@@ -36,7 +36,7 @@ async function run(): Promise<void> {
 }
 
 run()
-  .then(() => track({jobID, actionName: 'approver'}))
+  .then(async () => await track({jobID, actionName: 'approver'}))
   .catch(error => {
     if (error instanceof Error) {
       track({jobID, actionName: 'approver', error: error.message})
