@@ -28,13 +28,13 @@ const run = async (jobID: string): Promise<boolean> => {
 const jobID = required('codeball-job-id')
 
 run(jobID)
-  .then(isApproved => {
-    track({jobID, actionName: 'status'})
-    core.setOutput('approved', isApproved)
+  .then(async approved => {
+    await track({jobID, actionName: 'status'})
+    core.setOutput('approved', approved)
   })
-  .catch(error => {
+  .catch(async error => {
     if (error instanceof Error) {
-      track({jobID, actionName: 'status', error: error.message})
+      await track({jobID, actionName: 'status', error: error.message})
       core.setFailed(error.message)
     }
   })

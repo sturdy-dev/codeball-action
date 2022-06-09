@@ -47,7 +47,8 @@
       "@typescript-eslint/type-annotation-spacing": "error",
       "@typescript-eslint/unbound-method": "error",
       "no-console": "off",
-      "import/no-commonjs": "off"
+      "import/no-commonjs": "off",
+      "github/no-then": "off"
     },
     "env": {
       "node": true,
