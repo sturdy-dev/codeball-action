@@ -73,10 +73,10 @@ const run = async (): Promise<void> => {
 }
 
 run()
-  .then(() => track({jobID, actionName: 'labeler'}))
-  .catch(error => {
+  .then(async () => await track({jobID, actionName: 'labeler'}))
+  .catch(async error => {
     if (error instanceof Error) {
-      track({jobID, actionName: 'labeler', error: error.message})
+      await track({jobID, actionName: 'labeler', error: error.message})
       if (error.message === 'Resource not accessible by integration') {
         core.setFailed(
           'Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
