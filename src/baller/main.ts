@@ -1,5 +1,5 @@
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import core from '@actions/core'
+import github from '@actions/github'
 import {create} from '../lib'
 import {track} from '../lib/track/track'
 
@@ -27,7 +27,7 @@ async function run(): Promise<void> {
     core.info(`Job created: ${job.id}`)
     core.setOutput('codeball-job-id', job.id)
 
-    await track(job.id, 'baller')
+    track({jobID: job.id, actionName: 'baller'})
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

@@ -1,13 +1,15 @@
-import {isContributionJob, isFinalStatus, get} from '../lib'
-import * as core from '@actions/core'
+import {isContributionJob, isFinalStatus, get, required, Job} from '../lib'
+import core from '@actions/core'
 import {track} from '../lib/track/track'
+
+const isApproved = (job: Job): boolean =>
+  isFinalStatus(job.status) &&
+  isContributionJob(job) &&
+  job.contribution?.result === 'approved'
 
 async function run(): Promise<void> {
   try {
-    const jobID = core.getInput('codeball-job-id')
-    if (!jobID) {
-      throw new Error('No job ID found')
-    }
+    const jobID = required('codeball-job-id')
 
     core.info(`Job ID: ${jobID}`)
 
@@ -23,26 +25,9 @@ async function run(): Promise<void> {
       job = await get(jobID)
     }
 
-    if (!isFinalStatus(job.status)) {
-      core.setOutput('approved', false)
-      return
-    }
+    core.setOutput('approved', isApproved(job))
 
-    if (!isContributionJob(job)) {
-      core.setOutput('approved', false)
-      return
-    }
-
-    const approved = job.contribution?.result === 'approved'
-
-    if (approved) {
-      core.setOutput('approved', true)
-      return
-    }
-
-    core.setOutput('approved', false)
-
-    await track(jobID, 'status')
+    track({jobID, actionName: 'status'})
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)

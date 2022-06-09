@@ -1,6 +1,6 @@
-import * as core from '@actions/core'
-import * as github from '@actions/github'
-import {Octokit} from '../lib'
+import core from '@actions/core'
+import github from '@actions/github'
+import {Octokit, optional, required} from '../lib'
 import {track} from '../lib/track/track'
 
 async function run(): Promise<void> {
@@ -30,13 +30,9 @@ async function run(): Promise<void> {
       throw new Error('No repo name found')
     }
 
-    const githubToken = core.getInput('GITHUB_TOKEN')
-    if (!githubToken) {
-      core.setFailed('No GITHUB_TOKEN found')
-      return
-    }
+    const githubToken = required('GITHUB_TOKEN')
 
-    const jobID = core.getInput('codeball-job-id') // jobID is not required
+    const jobID = optional('codeball-job-id')
 
     const octokit = new Octokit({auth: githubToken})
 
@@ -49,7 +45,7 @@ async function run(): Promise<void> {
       event: 'APPROVE'
     })
 
-    await track(jobID, 'approver')
+    track({jobID, actionName: 'approver'})
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'Resource not accessible by integration') {
