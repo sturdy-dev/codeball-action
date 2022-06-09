@@ -1,5 +1,5 @@
-import core from '@actions/core'
-import github from '@actions/github'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
 import {Octokit, optional, required} from '../lib'
 import {track} from '../lib/track/track'
 

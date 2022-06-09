@@ -1,5 +1,5 @@
 import {isContributionJob, isFinalStatus, get, required, Job} from '../lib'
-import core from '@actions/core'
+import * as core from '@actions/core'
 import {track} from '../lib/track/track'
 
 const isApproved = (job: Job): boolean =>
