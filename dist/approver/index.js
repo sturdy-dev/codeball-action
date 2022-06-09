@@ -63625,61 +63625,117 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const lib_1 = __nccwpck_require__(6791);
 const track_1 = __nccwpck_require__(1263);
+const jobID = (0, lib_1.optional)('codeball-job-id');
 function run() {
     var _a, _b, _c, _d, _e, _f, _g;
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
-            if (!pullRequestURL) {
-                throw new Error('No pull request URL found');
-            }
-            const pullRequestNumber = (_d = (_c = github.context.payload) === null || _c === void 0 ? void 0 : _c.pull_request) === null || _d === void 0 ? void 0 : _d.number;
-            if (!pullRequestNumber) {
-                throw new Error('No pull request number found');
-            }
-            const commitId = (_e = github.context.payload.pull_request) === null || _e === void 0 ? void 0 : _e.head.sha;
-            if (!commitId) {
-                throw new Error('No commit ID found');
-            }
-            const repoOwner = (_f = github.context.payload.repository) === null || _f === void 0 ? void 0 : _f.owner.login;
-            if (!repoOwner) {
-                throw new Error('No repo owner found');
-            }
-            const repoName = (_g = github.context.payload.repository) === null || _g === void 0 ? void 0 : _g.name;
-            if (!repoName) {
-                throw new Error('No repo name found');
-            }
-            const githubToken = core.getInput('GITHUB_TOKEN');
-            if (!githubToken) {
-                core.setFailed('No GITHUB_TOKEN found');
-                return;
-            }
-            const jobID = core.getInput('codeball-job-id'); // jobID is not required
-            const octokit = new lib_1.Octokit({ auth: githubToken });
-            yield octokit.pulls.createReview({
-                owner: repoOwner,
-                repo: repoName,
-                pull_number: pullRequestNumber,
-                commit_id: commitId,
-                body: 'Codeball: LGTM! :+1:',
-                event: 'APPROVE'
-            });
-            yield (0, track_1.track)(jobID, 'approver');
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                if (error.message === 'Resource not accessible by integration') {
-                    core.error('Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
-                    core.error(error);
-                }
-                else {
-                    core.setFailed(error.message);
-                }
-            }
-        }
+        const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
+        if (!pullRequestURL)
+            throw new Error('No pull request URL found');
+        const pullRequestNumber = (_d = (_c = github.context.payload) === null || _c === void 0 ? void 0 : _c.pull_request) === null || _d === void 0 ? void 0 : _d.number;
+        if (!pullRequestNumber)
+            throw new Error('No pull request number found');
+        const commitId = (_e = github.context.payload.pull_request) === null || _e === void 0 ? void 0 : _e.head.sha;
+        if (!commitId)
+            throw new Error('No commit ID found');
+        const repoOwner = (_f = github.context.payload.repository) === null || _f === void 0 ? void 0 : _f.owner.login;
+        if (!repoOwner)
+            throw new Error('No repo owner found');
+        const repoName = (_g = github.context.payload.repository) === null || _g === void 0 ? void 0 : _g.name;
+        if (!repoName)
+            throw new Error('No repo name found');
+        const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
+        const octokit = new lib_1.Octokit({ auth: githubToken });
+        yield octokit.pulls.createReview({
+            owner: repoOwner,
+            repo: repoName,
+            pull_number: pullRequestNumber,
+            commit_id: commitId,
+            body: 'Codeball: LGTM! :+1:',
+            event: 'APPROVE'
+        });
     });
 }
-run();
+run()
+    .then(() => (0, track_1.track)({ jobID, actionName: 'approver' }))
+    .catch(error => {
+    if (error instanceof Error) {
+        (0, track_1.track)({ jobID, actionName: 'approver', error: error.message });
+        if (error.message === 'Resource not accessible by integration') {
+            core.setFailed('Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
+        }
+        else {
+            core.setFailed(error.message);
+        }
+    }
+});
+
+
+/***/ }),
+
+/***/ 7527:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(8913), exports);
+
+
+/***/ }),
+
+/***/ 8913:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.optional = exports.required = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const required = (name) => core.getInput(name, { required: true });
+exports.required = required;
+const optional = (name) => {
+    const value = core.getInput(name, { required: false });
+    return value === '' ? undefined : value;
+};
+exports.optional = optional;
 
 
 /***/ }),
@@ -63778,6 +63834,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(7527), exports);
 __exportStar(__nccwpck_require__(6518), exports);
 __exportStar(__nccwpck_require__(3769), exports);
 
@@ -63898,11 +63955,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
-const track = (jobID, actionName) => __awaiter(void 0, void 0, void 0, function* () {
+const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)("/track", {
-        job_id: jobID,
+        job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
-    });
+        error: error !== null && error !== void 0 ? error : null
+    }).catch(error => console.warn(error));
 });
 exports.track = track;
 

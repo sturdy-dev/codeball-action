@@ -63628,33 +63628,99 @@ const track_1 = __nccwpck_require__(1263);
 function run() {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
-            if (!pullRequestURL) {
-                core.setFailed('No pull request URL found');
-                return;
-            }
-            const githubToken = core.getInput('GITHUB_TOKEN');
-            if (!githubToken) {
-                core.setFailed('No GITHUB_TOKEN found');
-                return;
-            }
-            core.info(`Found contribution: ${pullRequestURL}`);
-            const job = yield (0, lib_1.create)({
-                url: pullRequestURL,
-                access_token: githubToken
-            });
-            core.info(`Job created: ${job.id}`);
-            core.setOutput('codeball-job-id', job.id);
-            yield (0, track_1.track)(job.id, 'baller');
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
-        }
+        const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
+        if (!pullRequestURL)
+            throw new Error('No pull request URL found');
+        const githubToken = core.getInput('GITHUB_TOKEN');
+        if (!githubToken)
+            throw new Error('No GitHub token found');
+        core.info(`Found contribution: ${pullRequestURL}`);
+        const job = yield (0, lib_1.create)({
+            url: pullRequestURL,
+            access_token: githubToken
+        });
+        core.info(`Job created: ${job.id}`);
+        return { jobId: job.id };
     });
 }
-run();
+run()
+    .then(({ jobId }) => {
+    (0, track_1.track)({ jobID: jobId, actionName: 'baller' });
+    core.setOutput('codeball-job-id', jobId);
+})
+    .catch(error => {
+    (0, track_1.track)({ actionName: 'baller', error: error.message });
+    if (error instanceof Error) {
+        core.setFailed(error.message);
+    }
+});
+
+
+/***/ }),
+
+/***/ 7527:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(8913), exports);
+
+
+/***/ }),
+
+/***/ 8913:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.optional = exports.required = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const required = (name) => core.getInput(name, { required: true });
+exports.required = required;
+const optional = (name) => {
+    const value = core.getInput(name, { required: false });
+    return value === '' ? undefined : value;
+};
+exports.optional = optional;
 
 
 /***/ }),
@@ -63753,6 +63819,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(7527), exports);
 __exportStar(__nccwpck_require__(6518), exports);
 __exportStar(__nccwpck_require__(3769), exports);
 
@@ -63873,11 +63940,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
-const track = (jobID, actionName) => __awaiter(void 0, void 0, void 0, function* () {
+const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)("/track", {
-        job_id: jobID,
+        job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
-    });
+        error: error !== null && error !== void 0 ? error : null
+    }).catch(error => console.warn(error));
 });
 exports.track = track;
 

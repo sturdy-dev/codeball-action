@@ -63368,6 +63368,73 @@ XRegExp = XRegExp || (function (undef) {
 
 /***/ }),
 
+/***/ 7527:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(8913), exports);
+
+
+/***/ }),
+
+/***/ 8913:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.optional = exports.required = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const required = (name) => core.getInput(name, { required: true });
+exports.required = required;
+const optional = (name) => {
+    const value = core.getInput(name, { required: false });
+    return value === '' ? undefined : value;
+};
+exports.optional = optional;
+
+
+/***/ }),
+
 /***/ 9095:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -63462,6 +63529,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(7527), exports);
 __exportStar(__nccwpck_require__(6518), exports);
 __exportStar(__nccwpck_require__(3769), exports);
 
@@ -63582,11 +63650,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
-const track = (jobID, actionName) => __awaiter(void 0, void 0, void 0, function* () {
+const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)("/track", {
-        job_id: jobID,
+        job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
-    });
+        error: error !== null && error !== void 0 ? error : null
+    }).catch(error => console.warn(error));
 });
 exports.track = track;
 
@@ -63634,48 +63703,37 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const lib_1 = __nccwpck_require__(6791);
 const core = __importStar(__nccwpck_require__(2186));
 const track_1 = __nccwpck_require__(1263);
-function run() {
+const isApproved = (job) => {
     var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const jobID = core.getInput('codeball-job-id');
-            if (!jobID) {
-                throw new Error('No job ID found');
-            }
-            core.info(`Job ID: ${jobID}`);
-            let job = yield (0, lib_1.get)(jobID);
-            let attempts = 0;
-            const maxAttempts = 60;
-            while (attempts < maxAttempts && !(0, lib_1.isFinalStatus)(job.status)) {
-                attempts++;
-                core.info(`Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`);
-                yield new Promise(resolve => setTimeout(resolve, 5000));
-                job = yield (0, lib_1.get)(jobID);
-            }
-            if (!(0, lib_1.isFinalStatus)(job.status)) {
-                core.setOutput('approved', false);
-                return;
-            }
-            if (!(0, lib_1.isContributionJob)(job)) {
-                core.setOutput('approved', false);
-                return;
-            }
-            const approved = ((_a = job.contribution) === null || _a === void 0 ? void 0 : _a.result) === 'approved';
-            if (approved) {
-                core.setOutput('approved', true);
-                return;
-            }
-            core.setOutput('approved', false);
-            yield (0, track_1.track)(jobID, 'status');
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                core.setFailed(error.message);
-            }
-        }
-    });
-}
-run();
+    return (0, lib_1.isFinalStatus)(job.status) &&
+        (0, lib_1.isContributionJob)(job) &&
+        ((_a = job.contribution) === null || _a === void 0 ? void 0 : _a.result) === 'approved';
+};
+const run = (jobID) => __awaiter(void 0, void 0, void 0, function* () {
+    core.info(`Job ID: ${jobID}`);
+    let job = yield (0, lib_1.get)(jobID);
+    let attempts = 0;
+    const maxAttempts = 60;
+    while (attempts < maxAttempts && !(0, lib_1.isFinalStatus)(job.status)) {
+        attempts++;
+        core.info(`Waiting for job ${jobID} to complete... (${attempts}/${maxAttempts})`);
+        yield new Promise(resolve => setTimeout(resolve, 5000));
+        job = yield (0, lib_1.get)(jobID);
+    }
+    return isApproved(job);
+});
+const jobID = (0, lib_1.required)('codeball-job-id');
+run(jobID)
+    .then(isApproved => {
+    (0, track_1.track)({ jobID, actionName: 'status' });
+    core.setOutput('approved', isApproved);
+})
+    .catch(error => {
+    if (error instanceof Error) {
+        (0, track_1.track)({ jobID, actionName: 'status', error: error.message });
+        core.setFailed(error.message);
+    }
+});
 
 
 /***/ }),
