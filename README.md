@@ -1,4 +1,5 @@
-![github_bg](https://user-images.githubusercontent.com/47952/170700847-bb0cac65-f269-4758-955a-632c48f47290.png)
+![Codeball](https://user-images.githubusercontent.com/47952/173048697-d3d39fc3-6238-4fc3-9baf-ccbbb3b4258c.png)
+
 
 # CODEBALL &mdash; AI CODE REVIEW 🔮
 
@@ -34,7 +35,9 @@ jobs:
 
 ## Customizations
 
-Codeball Actions are built on multiple smaller building-blocks, that are heavily configurable through GitHub Actions.
+Codeball Actions are built on multiple smaller building-blocks, that are heavily configurable through GitHub Actions. Here's a few examples:
+
+_If you're using Codeball in another way, please let us know in an issue!_
 
 ### Example: "Dry-run" mode, labels all PRs with the Codeball Result
 
@@ -181,7 +184,7 @@ jobs:
 </details>
 
 
-### Example:
+### Example: Fail the Codeball Action (❌) if Codeball does not approve the contribution
 
 <details>
   <summary>▶️ codeball-fail-not-approved.yml</summary>
@@ -266,6 +269,6 @@ permissions:
 
 ### Forks and private repositories
 
-By default, only pull requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved.
+By default, pull requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved or labeled.
 
 If you're using forks from a private repository, and want to use Codeball on Pull Requests created from a fork.  Enable "Send write tokens to workflows from fork pull requests" on the repository ([docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#enabling-workflows-for-private-repository-forks)).
