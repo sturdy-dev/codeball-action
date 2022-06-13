@@ -25,12 +25,14 @@ async function run(): Promise<void> {
 
   const octokit = new Octokit({auth: githubToken})
 
+  const dashboardLink = '[dashboard](https://codeball.ai/' + process.env.GITHUB_REPOSITORY + ')'
+
   await octokit.pulls.createReview({
     owner: repoOwner,
     repo: repoName,
     pull_number: pullRequestNumber,
     commit_id: commitId,
-    body: 'Codeball: LGTM! :+1:',
+    body: 'Codeball: LGTM! :+1: ' + '(' + dashboardLink + ')',
     event: 'APPROVE'
   })
 }
