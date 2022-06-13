@@ -63646,7 +63646,10 @@ function run() {
 run()
     .then(({ jobId }) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, track_1.track)({ jobID: jobId, actionName: 'baller' });
-    core.setOutput('codeball-job-id', jobId);
+    yield core.setOutput('codeball-job-id', jobId);
+    core.summary
+        .addLink('Codeball Dashboard for ' + process.env.GITHUB_REPOSITORY, 'https://codeball.ai/' + process.env.GITHUB_REPOSITORY)
+        .write();
 }))
     .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, track_1.track)({ actionName: 'baller', error: error.message });

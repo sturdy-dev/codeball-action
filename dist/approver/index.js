@@ -63645,13 +63645,15 @@ function run() {
         if (!repoName)
             throw new Error('No repo name found');
         const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
+        const message = (0, lib_1.required)('message');
         const octokit = new lib_1.Octokit({ auth: githubToken });
+        const dashboardLink = '[dashboard](https://codeball.ai/' + process.env.GITHUB_REPOSITORY + ')';
         yield octokit.pulls.createReview({
             owner: repoOwner,
             repo: repoName,
             pull_number: pullRequestNumber,
             commit_id: commitId,
-            body: 'Codeball: LGTM! :+1:',
+            body: message + ' (' + dashboardLink + ')',
             event: 'APPROVE'
         });
     });
