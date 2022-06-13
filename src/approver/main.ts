@@ -22,6 +22,7 @@ async function run(): Promise<void> {
   if (!repoName) throw new Error('No repo name found')
 
   const githubToken = required('GITHUB_TOKEN')
+  const message = required('message')
 
   const octokit = new Octokit({auth: githubToken})
 
@@ -32,7 +33,7 @@ async function run(): Promise<void> {
     repo: repoName,
     pull_number: pullRequestNumber,
     commit_id: commitId,
-    body: 'Codeball: LGTM! :+1: ' + '(' + dashboardLink + ')',
+    body: message + ' (' + dashboardLink + ')',
     event: 'APPROVE'
   })
 }
