@@ -7,6 +7,24 @@ branding:
   icon: check
   color: orange
 
+inputs:
+  approvePullRequests:
+    description: 'If "true", the action will submit an approving review if the Codeball AI approves the contribution'
+    default: "true"
+    required: false
+  labelPullRequestsWhenApproved:
+    description: 'If "true", the action will add `codeball:approved` label to the Pull Request if Codeball AI approves the contribution'
+    default: "true"
+    required: false
+  labelPullRequestsWhenReviewNeeded:
+    description: 'If "true", the action will add `codeball:needs-review` label to the Pull Request if the Codeball AI approves the contribution'
+    default: "false"
+    required: false
+  failJobsWhenReviewNeeded:
+    description: 'If "true", the action will exit with status code 1 if the Codeball AI does not approve the contribution'
+    default: "false"
+    required: false
+
 runs:
   using: 'composite'
   steps:
@@ -31,11 +49,27 @@ runs:
       with:
         name: "codeball:approved"
         color: "86efac" # green
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id && inputs.labelPullRequestsWhenApproved == 'true' }}
+
+    # If Codeball did not approve the contribution, add a "codeball:needs-review" label
+    - name: Label Needs Review
+      uses: sturdy-dev/codeball-action/labeler@v2
+      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.labelPullRequestsWhenReviewNeeded == 'true' }}
+      with:
+        name: "codeball:needs-review"
+        color: "bfdbfe" # blue
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
       uses: sturdy-dev/codeball-action/approver@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.approvePullRequests == 'true' }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+    # If Codeball didn't approve the contribution, fail the job.
+    - name: Fail Job
+      shell: bash
+      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.failJobsWhenReviewNeeded == 'true' }}
+      run: |
+        echo "Not approved"
+        exit 1

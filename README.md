@@ -29,6 +29,11 @@ jobs:
     steps:
       - name: Codeball
         uses: sturdy-dev/codeball-action@v2
+        with:
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "false"
+          failJobsWhenReviewNeeded: "false"
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
