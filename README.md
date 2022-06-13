@@ -229,7 +229,8 @@ jobs:
 
       # If Codeball didn't approve the contribution, fail the job.
       - name: Fail Job
-        if: ${{ steps.codeball_status.outputs.approved == 'fail' }}
+        shell: bash
+        if: ${{ steps.codeball_status.outputs.approved == 'false' }}
         run: |
           echo "Not approved"
           exit 1
