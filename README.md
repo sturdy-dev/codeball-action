@@ -1,6 +1,5 @@
-![github_bg](https://user-images.githubusercontent.com/47952/170700847-bb0cac65-f269-4758-955a-632c48f47290.png)
+![Codeball](https://user-images.githubusercontent.com/47952/173048697-d3d39fc3-6238-4fc3-9baf-ccbbb3b4258c.png)
 
-Test :-)
 
 # CODEBALL &mdash; AI CODE REVIEW 🔮
 
@@ -30,13 +29,20 @@ jobs:
     steps:
       - name: Codeball
         uses: sturdy-dev/codeball-action@v2
+        with:
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "false"
+          failJobsWhenReviewNeeded: "false"
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
 
 ## Customizations
 
-Codeball Actions are built on multiple smaller building-blocks, that are heavily configurable through GitHub Actions.
+Codeball Actions are built on multiple smaller building-blocks, that are heavily configurable through GitHub Actions. Here's a few examples:
+
+_If you're using Codeball in another way, please let us know in an issue!_
 
 ### Example: "Dry-run" mode, labels all PRs with the Codeball Result
 
@@ -44,49 +50,21 @@ Codeball Actions are built on multiple smaller building-blocks, that are heavily
   <summary>▶️ codeball-dry-run.yml</summary>
   
 ```yaml
+name: Codeball
 on: [pull_request]
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
 jobs:
-  codeball:
+  codeball_job:
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-
-      # Start a new Codeball review job
-      # This step is asynchronous and will return a job id
-      - name: Trigger Codeball
-        id: codeball_baller
-        uses: sturdy-dev/codeball-action/baller@v2
-
-
-      # Wait for Codeball to return the status
-      - name: Get Status
-        id: codeball_status
-        uses: sturdy-dev/codeball-action/status@v2
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
         with:
-          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-
-      # If Codeball approved the contribution, add a "codeball:approved" label
-      - name: Label Approved
-        uses: sturdy-dev/codeball-action/labeler@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-        with:
-          name: "codeball:approved"
-          color: "86efac" # green
-
-      # If Codeball did not approve the contribution, add a "codeball:needs-review" label
-      - name: Label Needs Review
-        uses: sturdy-dev/codeball-action/labeler@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'false' }}
-        with:
-          name: "codeball:needs-review"
-          color: "bfdbfe" # blue
-
+          approvePullRequests: "false"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "true"
+          failJobsWhenReviewNeeded: "false"
 ```
 </details>
 
@@ -96,39 +74,21 @@ jobs:
   <summary>▶️ codeball-approve.yml</summary>
   
 ```yaml
+name: Codeball
 on: [pull_request]
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
 jobs:
-  codeball:
+  codeball_job:
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-
-      # Start a new Codeball review job
-      # This step is asynchronous and will return a job id
-      - name: Trigger Codeball
-        id: codeball_baller
-        uses: sturdy-dev/codeball-action/baller@v2
-
-
-      # Wait for Codeball to return the status
-      - name: Get Status
-        id: codeball_status
-        uses: sturdy-dev/codeball-action/status@v2
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
         with:
-          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-
-      # If Codeball approved the contribution, approve the PR
-      - name: Approve PR
-        uses: sturdy-dev/codeball-action/approver@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-        with:
-          message: "Codeball: LGTM! :+1:"
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "false"
+          labelPullRequestsWhenReviewNeeded: "false"
+          failJobsWhenReviewNeeded: "false"
 ```
 </details>
 
@@ -139,6 +99,7 @@ jobs:
   <summary>▶️ codeball-filter-files.yml</summary>
   
 ```yaml
+name: Codeball
 on:
   pull_request:
     # Run Codeball only if files under "/web/" has been modified (and no other files)
@@ -147,86 +108,43 @@ on:
       - '!**'
       - '/web/**'
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
 jobs:
-  codeball:
+  codeball_job:
     runs-on: ubuntu-latest
     name: Codeball
-
     steps:
-
-      # Start a new Codeball review job
-      # This step is asynchronous and will return a job id
-      - name: Trigger Codeball
-        id: codeball_baller
-        uses: sturdy-dev/codeball-action/baller@v2
-
-
-      # Wait for Codeball to return the status
-      - name: Get Status
-        id: codeball_status
-        uses: sturdy-dev/codeball-action/status@v2
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
         with:
-          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-
-      # If Codeball approved the contribution, approve the PR
-      - name: Approve PR
-        uses: sturdy-dev/codeball-action/approver@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-        with:
-          message: "Codeball: LGTM! :+1:"
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "false"
+          failJobsWhenReviewNeeded: "false"
 ```
 </details>
 
 
-### Example:
+### Example: Fail the Codeball Action (❌) if Codeball does not approve the contribution
 
 <details>
   <summary>▶️ codeball-fail-not-approved.yml</summary>
 
 ```yaml
+name: Codeball
 on: [pull_request]
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-
 jobs:
-  codeball:
+  codeball_job:
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-      # Start a new Codeball review job
-      # This step is asynchronous and will return a job id
-      - name: Trigger Codeball
-        id: codeball_baller
-        uses: sturdy-dev/codeball-action/baller@v2
-
-      # Wait for Codeball to return the status
-      - name: Get Status
-        id: codeball_status
-        uses: sturdy-dev/codeball-action/status@v2
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
         with:
-          codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-
-      # If Codeball approved the contribution, approve the PR
-      - name: Approve PR
-        uses: sturdy-dev/codeball-action/approver@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-        with:
-          message: 'Codeball: LGTM! :+1:'
-
-      # If Codeball didn't approve the contribution, fail the job.
-      - name: Fail Job
-        if: ${{ steps.codeball_status.outputs.approved == 'fail' }}
-        run: |
-          echo "Not approved"
-          exit 1
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "false"
+          failJobsWhenReviewNeeded: "true"
 ```
 </details>
 
@@ -268,6 +186,6 @@ permissions:
 
 ### Forks and private repositories
 
-By default, only pull requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved.
+By default, pull requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved or labeled.
 
 If you're using forks from a private repository, and want to use Codeball on Pull Requests created from a fork.  Enable "Send write tokens to workflows from fork pull requests" on the repository ([docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#enabling-workflows-for-private-repository-forks)).

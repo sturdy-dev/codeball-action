@@ -24,7 +24,11 @@ async function run(): Promise<{jobId: string}> {
 run()
   .then(async ({jobId}) => {
     await track({jobID: jobId, actionName: 'baller'})
-    core.setOutput('codeball-job-id', jobId)
+    await core.setOutput('codeball-job-id', jobId)
+
+    core.summary
+		.addLink('Codeball Dashboard for ' + process.env.GITHUB_REPOSITORY, 'https://codeball.ai/' + process.env.GITHUB_REPOSITORY)
+    .write()
   })
   .catch(async error => {
     await track({actionName: 'baller', error: error.message})
