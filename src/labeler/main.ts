@@ -26,6 +26,7 @@ const run = async (): Promise<void> => {
   const labelName = required('name')
   const labelColor = required('color')
   const labelDescription = required('description')
+  const removeLabelNames = optional('remove-label-names')
 
   const octokit = new Octokit({auth: githubToken})
 
@@ -70,6 +71,20 @@ const run = async (): Promise<void> => {
 
   core.debug(`Add label: ${JSON.stringify(addLabelParams)}`)
   await octokit.issues.addLabels(addLabelParams)
+
+  if (removeLabelNames) {
+    const removeLabels = removeLabelNames.split(',')
+    for (const name of removeLabels) {
+      const removeLabelParams = {
+        owner: repoOwner,
+        repo: repoName,
+        issue_number: pullRequestNumber,
+        name
+      }
+      core.debug(`Remove label: ${JSON.stringify(removeLabelParams)}`)
+      await octokit.issues.removeLabel(removeLabelParams)
+    }
+  }
 }
 
 run()
