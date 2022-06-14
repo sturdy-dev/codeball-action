@@ -32,20 +32,14 @@ const run = async (): Promise<void> => {
 
   core.debug(`Adding label "${labelName}" to PR ${pullRequestURL}`)
 
-  const existingLabels = await octokit.issues.listLabelsForRepo({
+  const labelsForRepo = await octokit.issues.listLabelsForRepo({
     owner: repoOwner,
     repo: repoName
   })
 
-  let haveLabel = false
-  for (const label of existingLabels.data) {
-    if (label.name === labelName) {
-      haveLabel = true
-      break
-    }
-  }
+  const labelsForRepoSet = new Set(labelsForRepo.data.map(label => label.name))
 
-  if (!haveLabel) {
+  if (!labelsForRepoSet.has(labelName)) {
     core.info(`Label "${labelName}" does not exist, creating it now`)
 
     const createLabelParams = {
@@ -73,8 +67,25 @@ const run = async (): Promise<void> => {
   await octokit.issues.addLabels(addLabelParams)
 
   if (removeLabelNames) {
+    const labelsOnIssue = await octokit.issues.listLabelsOnIssue({
+      owner: repoOwner,
+      repo: repoName,
+      issue_number: pullRequestNumber
+    })
+
+    const labelsOnIssueSet = new Set(
+      labelsOnIssue.data.map(label => label.name)
+    )
+
     const removeLabels = removeLabelNames.split(',')
     for (const name of removeLabels) {
+      if (!labelsOnIssueSet.has(name)) {
+        core.info(
+          `Label "${name}" is not set on this issue, will not remove it`
+        )
+        continue
+      }
+
       const removeLabelParams = {
         owner: repoOwner,
         repo: repoName,
