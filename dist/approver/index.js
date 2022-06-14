@@ -63647,22 +63647,23 @@ function run() {
         const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
         const message = (0, lib_1.required)('message');
         const octokit = new lib_1.Octokit({ auth: githubToken });
-        const dashboardLink = '[dashboard](https://codeball.ai/' + process.env.GITHUB_REPOSITORY + ')';
+        const dashboardLink = `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`;
+        const reviewMessage = `${message} ${dashboardLink}`;
         yield octokit.pulls.createReview({
             owner: repoOwner,
             repo: repoName,
             pull_number: pullRequestNumber,
             commit_id: commitId,
-            body: message + ' (' + dashboardLink + ')',
+            body: reviewMessage,
             event: 'APPROVE'
         });
     });
 }
 run()
     .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'approver' }); }))
-    .catch(error => {
+    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
-        (0, track_1.track)({ jobID, actionName: 'approver', error: error.message });
+        yield (0, track_1.track)({ jobID, actionName: 'approver', error: error.message });
         if (error.message === 'Resource not accessible by integration') {
             core.setFailed('Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
         }
@@ -63670,7 +63671,7 @@ run()
             core.setFailed(error.message);
         }
     }
-});
+}));
 
 
 /***/ }),

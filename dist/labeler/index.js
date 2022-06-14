@@ -63647,20 +63647,15 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     const labelName = (0, lib_1.required)('name');
     const labelColor = (0, lib_1.required)('color');
     const labelDescription = (0, lib_1.required)('description');
+    const removeLabelNames = (0, lib_1.optional)('remove-label-names');
     const octokit = new lib_1.Octokit({ auth: githubToken });
     core.debug(`Adding label "${labelName}" to PR ${pullRequestURL}`);
-    const existingLabels = yield octokit.issues.listLabelsForRepo({
+    const labelsForRepo = yield octokit.issues.listLabelsForRepo({
         owner: repoOwner,
         repo: repoName
     });
-    let haveLabel = false;
-    for (const label of existingLabels.data) {
-        if (label.name === labelName) {
-            haveLabel = true;
-            break;
-        }
-    }
-    if (!haveLabel) {
+    const labelsForRepoSet = new Set(labelsForRepo.data.map(label => label.name));
+    if (!labelsForRepoSet.has(labelName)) {
         core.info(`Label "${labelName}" does not exist, creating it now`);
         const createLabelParams = {
             owner: repoOwner,
@@ -63683,6 +63678,29 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     };
     core.debug(`Add label: ${JSON.stringify(addLabelParams)}`);
     yield octokit.issues.addLabels(addLabelParams);
+    if (removeLabelNames) {
+        const labelsOnIssue = yield octokit.issues.listLabelsOnIssue({
+            owner: repoOwner,
+            repo: repoName,
+            issue_number: pullRequestNumber
+        });
+        const labelsOnIssueSet = new Set(labelsOnIssue.data.map(label => label.name));
+        const removeLabels = removeLabelNames.split(',');
+        for (const name of removeLabels) {
+            if (!labelsOnIssueSet.has(name)) {
+                core.info(`Label "${name}" is not set on this issue, will not remove it`);
+                continue;
+            }
+            const removeLabelParams = {
+                owner: repoOwner,
+                repo: repoName,
+                issue_number: pullRequestNumber,
+                name
+            };
+            core.debug(`Remove label: ${JSON.stringify(removeLabelParams)}`);
+            yield octokit.issues.removeLabel(removeLabelParams);
+        }
+    }
 });
 run()
     .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'labeler' }); }))
