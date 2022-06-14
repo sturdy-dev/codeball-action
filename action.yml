@@ -60,6 +60,7 @@ runs:
         name: "codeball:needs-review"
         color: "bfdbfe" # blue
         remove-label-names: "codeball:approved"
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
