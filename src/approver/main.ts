@@ -26,23 +26,24 @@ async function run(): Promise<void> {
 
   const octokit = new Octokit({auth: githubToken})
 
-  const dashboardLink = '[dashboard](https://codeball.ai/' + process.env.GITHUB_REPOSITORY + ')'
+  const dashboardLink = `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
+  const reviewMessage = `${message} ${dashboardLink}`
 
   await octokit.pulls.createReview({
     owner: repoOwner,
     repo: repoName,
     pull_number: pullRequestNumber,
     commit_id: commitId,
-    body: message + ' (' + dashboardLink + ')',
+    body: reviewMessage,
     event: 'APPROVE'
   })
 }
 
 run()
   .then(async () => await track({jobID, actionName: 'approver'}))
-  .catch(error => {
+  .catch(async error => {
     if (error instanceof Error) {
-      track({jobID, actionName: 'approver', error: error.message})
+      await track({jobID, actionName: 'approver', error: error.message})
       if (error.message === 'Resource not accessible by integration') {
         core.setFailed(
           'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'

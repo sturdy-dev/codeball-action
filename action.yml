@@ -45,11 +45,12 @@ runs:
     # If Codeball approved the contribution, add a "codeball:approved" label
     - name: Label Approved
       uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.labelPullRequestsWhenApproved == 'true' }}
       with:
         name: "codeball:approved"
         color: "86efac" # green
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id && inputs.labelPullRequestsWhenApproved == 'true' }}
+        remove-label-names: "codeball:needs-review"
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball did not approve the contribution, add a "codeball:needs-review" label
     - name: Label Needs Review
@@ -58,6 +59,8 @@ runs:
       with:
         name: "codeball:needs-review"
         color: "bfdbfe" # blue
+        remove-label-names: "codeball:approved"
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
