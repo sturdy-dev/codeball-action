@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {create} from '../lib'
-import {track} from '../lib/track/track'
+import {track} from '../lib/track'
 
 async function run(): Promise<{jobId: string}> {
   const pullRequestURL = github.context.payload?.pull_request?.html_url
