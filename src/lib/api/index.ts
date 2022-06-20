@@ -2,16 +2,23 @@ import fetch, {Response} from 'node-fetch'
 
 const BASE_URL = process.env.CODEBALL_API_HOST || 'https://api.codeball.ai'
 
+export class ForbiddenError extends Error {
+  constructor(message?: string) {
+    super(message || 'Forbidden')
+    this.name = 'ForbiddenError'
+  }
+}
+
 export class BadRequestError extends Error {
-  constructor(message: string) {
-    super(message)
+  constructor(message?: string) {
+    super(message || 'Bad Request')
     this.name = 'BadRequestError'
   }
 }
 
 export class NotFoundError extends Error {
-  constructor() {
-    super('Not found')
+  constructor(message?: string) {
+    super(message || 'Not Found')
     this.name = 'NotFoundError'
   }
 }
@@ -23,6 +30,8 @@ const handleResponse = async (response: Response): Promise<any> => {
     throw new NotFoundError()
   } else if (response.status === 400) {
     throw new BadRequestError(await response.text())
+  } else if (response.status === 403) {
+    throw new ForbiddenError(await response.text())
   } else {
     throw new Error(await response.text())
   }
