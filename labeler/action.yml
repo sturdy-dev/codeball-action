@@ -21,6 +21,14 @@ inputs:
     description: "The description of the label."
     default: "Codeball"
     required: false
+
+  # Use remove-label-names to remove labels from previous executions of Codeball.
+  # For example if a previous execution added a label called "rejected", and it's now approved, you can remove the label "rejected" when adding the "approved" label.
+  remove-label-names:
+    description: "A comma separated list of labels to remove from the PR if they exist."
+    default: ""
+    required: false
+
   codeball-job-id:
     description: 'The ID of the Codeball Job created by the Baller Action'
     required: false

@@ -26,6 +26,14 @@ The description of the label.
 
 Default: `"Codeball"`
 
+## `remove-label-names` (optional)
+
+A comma separated list of label names to remove from the Pull Request.
+
+For example if a previous execution added a label called "rejected", and it's now approved, you can remove the label "rejected" when adding the "approved" label.
+
+Default: `""`
+
 # Outputs
 
 _This action has no outputs_
