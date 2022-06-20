@@ -11,18 +11,18 @@ jobs:
     # This step is asynchronous and will return a job id
     - name: Trigger Codeball
       id: codeball_baller
-      uses: sturdy-dev/codeball-action/baller@v2
+      uses: sturdy-dev/codeball-action/baller@beta
 
     # Wait for Codeball to return the status
     - name: Get Status
       id: codeball_status
-      uses: sturdy-dev/codeball-action/status@v2
+      uses: sturdy-dev/codeball-action/status@beta
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball approved the contribution, add a "codeball:approved" label
     - name: Label Approved
-      uses: sturdy-dev/codeball-action/labeler@v2
+      uses: sturdy-dev/codeball-action/labeler@beta
       if: ${{ steps.codeball_status.outputs.approved == 'true' }}
       with:
         name: "codeball:approved"
@@ -30,7 +30,7 @@ jobs:
 
     # If Codeball did not approve the contribution, add a "codeball:needs-review" label
     - name: Label Approved
-      uses: sturdy-dev/codeball-action/labeler@v2
+      uses: sturdy-dev/codeball-action/labeler@beta
       if: ${{ steps.codeball_status.outputs.approved == 'false' }}
       with:
         name: "codeball:needs-review"
@@ -38,5 +38,5 @@ jobs:
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
-      uses: sturdy-dev/codeball-action/approver@v2
+      uses: sturdy-dev/codeball-action/approver@beta
       if: ${{ steps.codeball_status.outputs.approved == 'true' }}
