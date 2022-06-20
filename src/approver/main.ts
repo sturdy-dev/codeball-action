@@ -1,7 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Octokit, optional, required} from '../lib'
-import {track} from '../lib/track/track'
+import {ForbiddenError} from '../lib/api'
+import {approve} from '../lib/github'
+import {track} from '../lib/track'
 
 const jobID = optional('codeball-job-id')
 
@@ -29,14 +31,50 @@ async function run(): Promise<void> {
   const dashboardLink = `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
   const reviewMessage = `${message} ${dashboardLink}`
 
-  await octokit.pulls.createReview({
-    owner: repoOwner,
-    repo: repoName,
-    pull_number: pullRequestNumber,
-    commit_id: commitId,
-    body: reviewMessage,
-    event: 'APPROVE'
-  })
+  const pr = await octokit.pulls
+    .get({
+      owner: repoOwner,
+      repo: repoName,
+      pull_number: pullRequestNumber
+    })
+    .then(r => r.data)
+
+  const isPrivate = pr.base.repo.private
+  const isFromFork = pr.head.repo?.fork
+  const isToFork = pr.base.repo.fork
+
+  await octokit.pulls
+    .createReview({
+      owner: repoOwner,
+      repo: repoName,
+      pull_number: pullRequestNumber,
+      commit_id: commitId,
+      body: reviewMessage,
+      event: 'APPROVE'
+    })
+    .catch(async error => {
+      if (
+        error instanceof Error &&
+        error.message === 'Resource not accessible by integration'
+      ) {
+        // If the token is not allowed to create reviews (for example it's a pull request from a public fork),
+        // we can try to approve the pull request from the backend with the app token.
+        return approve({
+          link: pullRequestURL,
+          message: reviewMessage
+        }).catch(error => {
+          if (error.name === ForbiddenError.name) {
+            throw new Error(
+              !isPrivate && isFromFork && !isToFork
+                ? 'Codeball Approver failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to approve Pull Requests.'
+                : 'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+            )
+          }
+        })
+      } else {
+        throw error
+      }
+    })
 }
 
 run()
@@ -44,12 +82,6 @@ run()
   .catch(async error => {
     if (error instanceof Error) {
       await track({jobID, actionName: 'approver', error: error.message})
-      if (error.message === 'Resource not accessible by integration') {
-        core.setFailed(
-          'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
-        )
-      } else {
-        core.setFailed(error.message)
-      }
+      core.setFailed(error.message)
     }
   })
