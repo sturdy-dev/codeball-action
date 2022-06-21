@@ -1,35 +1,34 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Octokit, optional, required} from '../lib'
+import {label as labelViaAPI} from '../lib/github'
+import {ForbiddenError} from '../lib/api'
 import {track} from '../lib/track'
 
 const jobID = optional('codeball-job-id')
 
-const run = async (): Promise<void> => {
-  const pullRequestURL = github.context.payload?.pull_request?.html_url
-  if (!pullRequestURL) throw new Error('No pull request URL found')
+const githubToken = required('GITHUB_TOKEN')
+const octokit = new Octokit({auth: githubToken})
 
-  const pullRequestNumber = github.context.payload?.pull_request?.number
-  if (!pullRequestNumber) throw new Error('No pull request number found')
-
-  const commitId = github.context.payload.pull_request?.head.sha
-  if (!commitId) throw new Error('No commit ID found')
-
-  const repoOwner = github.context.payload.repository?.owner.login
-  if (!repoOwner) throw new Error('No repo owner found')
-
-  const repoName = github.context.payload.repository?.name
-  if (!repoName) throw new Error('No repo name found')
-
-  const githubToken = required('GITHUB_TOKEN')
-
-  const labelName = required('name')
-  const labelColor = required('color')
-  const labelDescription = required('description')
-  const removeLabelNames = optional('remove-label-names')
-
-  const octokit = new Octokit({auth: githubToken})
-
+const labelViaGithub = async ({
+  labelName,
+  pullRequestURL,
+  repoName,
+  repoOwner,
+  labelColor,
+  labelDescription,
+  pullRequestNumber,
+  removeLabelNames
+}: {
+  labelName: string
+  pullRequestURL: string
+  repoOwner: string
+  repoName: string
+  labelColor: string
+  labelDescription: string
+  pullRequestNumber: number
+  removeLabelNames: string[]
+}) => {
   core.debug(`Adding label "${labelName}" to PR ${pullRequestURL}`)
 
   const labelsForRepo = await octokit.issues.listLabelsForRepo({
@@ -66,7 +65,7 @@ const run = async (): Promise<void> => {
   core.debug(`Add label: ${JSON.stringify(addLabelParams)}`)
   await octokit.issues.addLabels(addLabelParams)
 
-  if (removeLabelNames) {
+  if (removeLabelNames.length > 0) {
     const labelsOnIssue = await octokit.issues.listLabelsOnIssue({
       owner: repoOwner,
       repo: repoName,
@@ -77,8 +76,7 @@ const run = async (): Promise<void> => {
       labelsOnIssue.data.map(label => label.name)
     )
 
-    const removeLabels = removeLabelNames.split(',')
-    for (const name of removeLabels) {
+    for (const name of removeLabelNames) {
       if (!labelsOnIssueSet.has(name)) {
         core.info(
           `Label "${name}" is not set on this issue, will not remove it`
@@ -98,17 +96,81 @@ const run = async (): Promise<void> => {
   }
 }
 
+const run = async (): Promise<void> => {
+  const pullRequestURL = github.context.payload?.pull_request?.html_url
+  if (!pullRequestURL) throw new Error('No pull request URL found')
+
+  const pullRequestNumber = github.context.payload?.pull_request?.number
+  if (!pullRequestNumber) throw new Error('No pull request number found')
+
+  const commitId = github.context.payload.pull_request?.head.sha
+  if (!commitId) throw new Error('No commit ID found')
+
+  const repoOwner = github.context.payload.repository?.owner.login
+  if (!repoOwner) throw new Error('No repo owner found')
+
+  const repoName = github.context.payload.repository?.name
+  if (!repoName) throw new Error('No repo name found')
+
+  const labelName = required('name')
+  const labelColor = required('color')
+  const labelDescription = required('description')
+  const removeLabelNames = optional('remove-label-names')
+
+  const pr = await octokit.pulls
+    .get({
+      owner: repoOwner,
+      repo: repoName,
+      pull_number: pullRequestNumber
+    })
+    .then(r => r.data)
+
+  const isPrivate = pr.base.repo.private
+  const isFromFork = pr.head.repo?.fork
+  const isToFork = pr.base.repo.fork
+
+  await labelViaGithub({
+    pullRequestURL,
+    repoName,
+    repoOwner,
+    labelName,
+    labelColor,
+    labelDescription,
+    pullRequestNumber,
+    removeLabelNames: removeLabelNames ? removeLabelNames.split(',') : []
+  }).catch(async error => {
+    if (
+      error instanceof Error &&
+      error.message === 'Resource not accessible by integration'
+    ) {
+      // If the token is not allowed to create labels (for example it's a pull request from a public fork),
+      // we can try to label the pull request from the backend with the app token.
+      return labelViaAPI({
+        link: pullRequestURL,
+        set: labelName,
+        description: labelDescription,
+        color: labelColor,
+        remove: removeLabelNames ? removeLabelNames.split(',') : []
+      }).catch(error => {
+        if (error.name === ForbiddenError.name) {
+          throw new Error(
+            !isPrivate && isFromFork && !isToFork
+              ? 'Codeball Labler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
+              : 'Codeball Labler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+          )
+        }
+      })
+    } else {
+      throw error
+    }
+  })
+}
+
 run()
   .then(async () => await track({jobID, actionName: 'labeler'}))
   .catch(async error => {
     if (error instanceof Error) {
       await track({jobID, actionName: 'labeler', error: error.message})
-      if (error.message === 'Resource not accessible by integration') {
-        core.setFailed(
-          'Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
-        )
-      } else {
-        core.setFailed(error.message)
-      }
+      core.setFailed(error.message)
     }
   })
