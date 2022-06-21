@@ -63624,10 +63624,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const lib_1 = __nccwpck_require__(6791);
-const track_1 = __nccwpck_require__(1263);
+const api_1 = __nccwpck_require__(9095);
+const github_1 = __nccwpck_require__(8216);
+const track_1 = __nccwpck_require__(4154);
 const jobID = (0, lib_1.optional)('codeball-job-id');
 function run() {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     return __awaiter(this, void 0, void 0, function* () {
         const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
         if (!pullRequestURL)
@@ -63649,14 +63651,46 @@ function run() {
         const octokit = new lib_1.Octokit({ auth: githubToken });
         const dashboardLink = `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`;
         const reviewMessage = `${message} ${dashboardLink}`;
-        yield octokit.pulls.createReview({
+        const pr = yield octokit.pulls
+            .get({
+            owner: repoOwner,
+            repo: repoName,
+            pull_number: pullRequestNumber
+        })
+            .then(r => r.data);
+        const isPrivate = pr.base.repo.private;
+        const isFromFork = (_h = pr.head.repo) === null || _h === void 0 ? void 0 : _h.fork;
+        const isToFork = pr.base.repo.fork;
+        yield octokit.pulls
+            .createReview({
             owner: repoOwner,
             repo: repoName,
             pull_number: pullRequestNumber,
             commit_id: commitId,
             body: reviewMessage,
             event: 'APPROVE'
-        });
+        })
+            .catch((error) => __awaiter(this, void 0, void 0, function* () {
+            if (error instanceof Error &&
+                error.message === 'Resource not accessible by integration') {
+                // If the token is not allowed to create reviews (for example it's a pull request from a public fork),
+                // we can try to approve the pull request from the backend with the app token.
+                return (0, github_1.approve)({
+                    link: pullRequestURL,
+                    message: reviewMessage
+                }).catch(error => {
+                    if (error.name === api_1.ForbiddenError.name) {
+                        throw new Error(!isPrivate && isFromFork && !isToFork
+                            ? 'Codeball Approver failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to approve Pull Requests.'
+                            : 'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
+                    }
+                    throw error;
+                });
+            }
+            else {
+                throw error;
+            }
+        }));
     });
 }
 run()
@@ -63664,12 +63698,7 @@ run()
     .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
         yield (0, track_1.track)({ jobID, actionName: 'approver', error: error.message });
-        if (error.message === 'Resource not accessible by integration') {
-            core.setFailed('Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
-        }
-        else {
-            core.setFailed(error.message);
-        }
+        core.setFailed(error.message);
     }
 }));
 
@@ -63761,19 +63790,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.post = exports.get = exports.NotFoundError = exports.BadRequestError = void 0;
+exports.post = exports.get = exports.NotFoundError = exports.BadRequestError = exports.ForbiddenError = void 0;
 const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
 const BASE_URL = process.env.CODEBALL_API_HOST || 'https://api.codeball.ai';
+class ForbiddenError extends Error {
+    constructor(message) {
+        super(message || 'Forbidden');
+        this.name = 'ForbiddenError';
+    }
+}
+exports.ForbiddenError = ForbiddenError;
 class BadRequestError extends Error {
     constructor(message) {
-        super(message);
+        super(message || 'Bad Request');
         this.name = 'BadRequestError';
     }
 }
 exports.BadRequestError = BadRequestError;
 class NotFoundError extends Error {
-    constructor() {
-        super('Not found');
+    constructor(message) {
+        super(message || 'Not Found');
         this.name = 'NotFoundError';
     }
 }
@@ -63788,6 +63824,9 @@ const handleResponse = (response) => __awaiter(void 0, void 0, void 0, function*
     else if (response.status === 400) {
         throw new BadRequestError(yield response.text());
     }
+    else if (response.status === 403) {
+        throw new ForbiddenError(yield response.text());
+    }
     else {
         throw new Error(yield response.text());
     }
@@ -63795,9 +63834,9 @@ const handleResponse = (response) => __awaiter(void 0, void 0, void 0, function*
 const get = (path) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, node_fetch_1.default)(new URL(path, BASE_URL).toString(), {
         headers: {
-            'User-Agent': 'github-actions',
+            'User-Agent': 'github-actions'
         },
-        redirect: 'follow',
+        redirect: 'follow'
     }).then(handleResponse);
 });
 exports.get = get;
@@ -63809,10 +63848,71 @@ const post = (path, body) => __awaiter(void 0, void 0, void 0, function* () {
             'User-Agent': 'github-actions',
             'Content-Type': 'application/json'
         },
-        redirect: 'follow',
+        redirect: 'follow'
     }).then(handleResponse);
 });
 exports.post = post;
+
+
+/***/ }),
+
+/***/ 8216:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(7571), exports);
+
+
+/***/ }),
+
+/***/ 7571:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.label = exports.approve = void 0;
+const api_1 = __nccwpck_require__(9095);
+const approve = ({ link, message }) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = message ? { link, message } : { link };
+    return (0, api_1.post)('/github/pulls/approve', body);
+});
+exports.approve = approve;
+const label = (params) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = Object.entries(params)
+        .filter(([_, value]) => value)
+        .reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+    }, {});
+    return (0, api_1.post)('/github/pulls/label', body);
+});
+exports.label = label;
 
 
 /***/ }),
@@ -63840,6 +63940,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(7527), exports);
 __exportStar(__nccwpck_require__(6518), exports);
 __exportStar(__nccwpck_require__(3769), exports);
+__exportStar(__nccwpck_require__(4154), exports);
+__exportStar(__nccwpck_require__(8216), exports);
 
 
 /***/ }),
@@ -63941,7 +64043,7 @@ function getApiBaseUrl() {
 
 /***/ }),
 
-/***/ 1263:
+/***/ 4154:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -63959,7 +64061,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
 const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, api_1.post)("/track", {
+    return (0, api_1.post)('/track', {
         job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
         error: error !== null && error !== void 0 ? error : null
