@@ -24,5 +24,5 @@ export const label = async (params: {
       acc[key] = value
       return acc
     }, {} as Record<string, any>)
-  return post('/github/pulls/approve', body)
+  return post('/github/pulls/label', body)
 }
