@@ -159,6 +159,7 @@ const run = async (): Promise<void> => {
               : 'Codeball Labler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
           )
         }
+        throw error
       })
     } else {
       throw error
