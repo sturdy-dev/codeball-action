@@ -1,5 +1,7 @@
 ![Codeball](https://user-images.githubusercontent.com/47952/173048697-d3d39fc3-6238-4fc3-9baf-ccbbb3b4258c.png)
 
+[![Discord](https://img.shields.io/badge/join-Discord-blue.svg)](https://discord.gg/nE4UcQHZtV)
+
 
 # CODEBALL &mdash; AI CODE REVIEW 🔮
 
