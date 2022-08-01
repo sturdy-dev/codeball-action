@@ -4,8 +4,27 @@ import {Octokit, optional, required} from '../lib'
 import {ForbiddenError} from '../lib/api'
 import {approve} from '../lib/github'
 import {track} from '../lib/track'
+import {list as listMessages} from '../lib/jobs/messages'
 
 const jobID = optional('codeball-job-id')
+
+const defaultMessages = [
+  required('message'),
+  '<hr />',
+  `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
+]
+
+const getServerSideMessages = (jobId: string) =>
+  listMessages(jobId).then(messages => [
+    required('message'),
+    '<hr />',
+    ...messages.map(message => message.text)
+  ])
+
+const getMessages = (jobId: string | undefined) =>
+  jobId
+    ? getServerSideMessages(jobId).catch(() => defaultMessages)
+    : defaultMessages
 
 async function run(): Promise<void> {
   const pullRequestURL = github.context.payload?.pull_request?.html_url
@@ -24,12 +43,9 @@ async function run(): Promise<void> {
   if (!repoName) throw new Error('No repo name found')
 
   const githubToken = required('GITHUB_TOKEN')
-  const message = required('message')
-
   const octokit = new Octokit({auth: githubToken})
 
-  const dashboardLink = `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
-  const reviewMessage = `${message} ${dashboardLink}`
+  const reviewMessage = (await getMessages(jobID)).join('\n\n')
 
   const pr = await octokit.pulls
     .get({
