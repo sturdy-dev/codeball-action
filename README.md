@@ -1,5 +1,7 @@
 ![Codeball](https://user-images.githubusercontent.com/47952/173048697-d3d39fc3-6238-4fc3-9baf-ccbbb3b4258c.png)
 
+[![Discord](https://img.shields.io/badge/join-Discord-blue.svg)](https://discord.gg/nE4UcQHZtV)
+
 
 # CODEBALL &mdash; AI CODE REVIEW 🔮
 
@@ -148,6 +150,33 @@ jobs:
 ```
 </details>
 
+### Example: Skip Draft pull requests
+
+<details>
+  <summary>▶️ cskip-drafts.yml</summary>
+
+```yaml
+name: Codeball
+on:
+  pull_request:
+     types:
+     - opened
+     - reopened
+     - synchronize
+     - ready_for_review
+
+jobs:
+  codeball_job:
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    name: Codeball
+    steps:
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
+```
+</details>
+
+
 
 ## Building Blocks
 
@@ -184,8 +213,16 @@ permissions:
   pull-requests: write
 ```
 
+### Forks and public repositories
+
+GitHub does not offer (and reasonably so) a way for Pull Requests from a fork to a public repository to run with "write" permissions to the parent repository.
+
+If you want to use Codeball on a public repository, install the ["Codeball AI Writer"](https://github.com/apps/codeball-ai-writer) app on the parent repository. This allows the Codeball Action to use the permissions from the app as a fallback if the action is running without write permissions.
+
 ### Forks and private repositories
 
-By default, pull requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved or labeled.
+By default, Pull Requests from a fork does not have "write" permissions when running in GitHub Actions, and those Pull Requests can not be approved or labeled.
 
-If you're using forks from a private repository, and want to use Codeball on Pull Requests created from a fork.  Enable "Send write tokens to workflows from fork pull requests" on the repository ([docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#enabling-workflows-for-private-repository-forks)).
+The easiest workaround to this issue is to install the ["Codeball AI Writer"](https://github.com/apps/codeball-ai-writer) app (see instructions for how to use Codeball on a public repository).
+
+Alternatively, you can enable "Send write tokens to workflows from fork pull requests" on the repository ([docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#enabling-workflows-for-private-repository-forks)) via GitHub.
