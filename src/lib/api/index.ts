@@ -37,8 +37,8 @@ const handleResponse = async (response: Response): Promise<any> => {
   }
 }
 
-export const get = async (path: string) =>
-  fetch(new URL(path, BASE_URL).toString(), {
+export const get = async (path: string, params = new URLSearchParams()) =>
+  fetch(new URL(path, BASE_URL).toString() + `?${params.toString()}}`, {
     headers: {
       'User-Agent': 'github-actions'
     },

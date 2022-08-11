@@ -4,7 +4,7 @@
   "description": "",
   "main": "lib/main.js",
   "scripts": {
-    "build": "yarn baller:build && yarn approver:build && yarn status:build && yarn labeler:build",
+    "build": "yarn baller:build && yarn approver:build && yarn status:build && yarn labeler:build && yarn suggester:build",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
@@ -12,6 +12,7 @@
     "approver:build": "ncc build src/approver/main.ts --out dist/approver --source-map --license licenses.txt",
     "status:build": "ncc build src/status/main.ts --out dist/status --source-map --license licenses.txt",
     "labeler:build": "ncc build src/labeler/main.ts --out dist/labeler --source-map --license licenses.txt",
+    "suggester:build": "ncc build src/suggester/main.ts --out dist/suggester --source-map --license licenses.txt",
     "test": "jest",
     "all": "yarn format && yarn lint && yarn build"
   },
