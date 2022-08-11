@@ -13,6 +13,8 @@ inputs:
 outputs:
   approved:
     description: 'If the Codeball approved the contribution (true or false)'
+  suggested:
+    description: 'If the Codeball has suggestions for the contribution (true or false)'
 
 runs:
   using: 'node16'
