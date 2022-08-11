@@ -213,6 +213,18 @@ permissions:
   pull-requests: write
 ```
 
+To allow PR approvals, make sure that **"Allow GitHub Actions to Create and Approve Pull Requests"** is enabled in the repository and organization settings on GitHub (under "Settings > Actions > General").
+
+<details>
+  <summary>Show recommended GitHub Permissions</summary>
+  
+  ![Fork pull request workflows from outside collaborators](https://user-images.githubusercontent.com/47952/184130867-8c149bfa-e827-425c-882b-eacf775c9542.png)
+![Fork pull request workflows in private repositories](https://user-images.githubusercontent.com/47952/184130872-7e91445d-4287-4b80-8c3b-6ff40fc893db.png)
+![Workflow permissions](https://user-images.githubusercontent.com/47952/184130874-54458e54-84f4-48fb-9347-0188c3ba27b6.png)
+</details>
+
+If you can not (or do not want to) update the org and repo settings for GitHub Actions, install the ["Codeball AI Writer"](https://github.com/apps/codeball-ai-writer) GitHub App on the repository. When installed, Codeball will use the permissions granted via the app instead of the GitHub Actions token.
+
 ### Forks and public repositories
 
 GitHub does not offer (and reasonably so) a way for Pull Requests from a fork to a public repository to run with "write" permissions to the parent repository.
