@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Octokit, optional, required} from '../lib'
+import {features, Octokit, optional, required} from '../lib'
 import {ForbiddenError} from '../lib/api'
 import {approve} from '../lib/github'
 import {track} from '../lib/track'
@@ -59,6 +59,15 @@ async function run(): Promise<void> {
   const isFromFork = pr.head.repo?.fork
   const isToFork = pr.base.repo.fork
 
+  const feats = await features({jobID})
+
+  if (!feats.approve) {
+    core.error(
+      'Unable to run this action as the feature is not available for your organization. Please upgrade your Codeball plan, or contact support@codeball.ai'
+    )
+    return
+  }
+
   await octokit.pulls
     .createReview({
       owner: repoOwner,
@@ -66,7 +75,7 @@ async function run(): Promise<void> {
       pull_number: pullRequestNumber,
       commit_id: commitId,
       body: reviewMessage,
-      event: 'APPROVE'
+      event: feats.approve ? 'APPROVE' : 'COMMENT'
     })
     .catch(async error => {
       if (

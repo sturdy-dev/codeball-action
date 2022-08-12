@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Octokit, optional, required} from '../lib'
+import {Octokit, optional, required, features} from '../lib'
 import {label as labelViaAPI} from '../lib/github'
 import {ForbiddenError} from '../lib/api'
 import {track} from '../lib/track'
@@ -116,6 +116,14 @@ const run = async (): Promise<void> => {
   const labelColor = required('color')
   const labelDescription = required('description')
   const removeLabelNames = optional('remove-label-names')
+
+  const feats = await features({jobID})
+  if (!feats.label) {
+    core.error(
+      'Unable to run this action as the feature is not available for your organization. Please upgrade your Codeball plan, or contact support@codeball.ai'
+    )
+    return
+  }
 
   const pr = await octokit.pulls
     .get({
