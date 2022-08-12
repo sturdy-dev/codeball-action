@@ -155,8 +155,8 @@ const run = async (): Promise<void> => {
         if (error.name === ForbiddenError.name) {
           throw new Error(
             !isPrivate && isFromFork && !isToFork
-              ? 'Codeball Labler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
-              : 'Codeball Labler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+              ? 'Codeball Labeler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
+              : 'Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
           )
         }
         throw error
