@@ -5,6 +5,7 @@ import {suggest} from '../lib/github'
 import {get} from '../lib/jobs'
 import {Octokit, required} from '../lib'
 import {ForbiddenError} from '../lib/api'
+import {exists} from 'fs'
 
 const jobID = required('codeball-job-id')
 const githubToken = required('GITHUB_TOKEN')
@@ -86,12 +87,6 @@ const suggestViaGitHub = async ({
       })
       .then(r => r.data)
 
-    // filter out already posted suggestions
-    suggestions = suggestions.filter(
-      suggestion =>
-        !existingComments.find(comment => comment.body === suggestion.text)
-    )
-
     suggestions.forEach(suggestion => {
       const request = {
         owner,
@@ -113,22 +108,43 @@ const suggestViaGitHub = async ({
         start_side?: 'LEFT' | 'RIGHT'
       }
 
-      if (count(suggestion.text, '\n') > 1) {
+      const isSuggestionMultiline = suggestion.from_line > suggestion.to_line
+      if (isSuggestionMultiline) {
         request.start_line = suggestion.from_line
         request.start_side = 'RIGHT'
-        request.line = suggestion.from_line + count(suggestion.text, '\n')
+
+        request.line = suggestion.to_line
         request.side = 'RIGHT'
       } else {
         request.line = suggestion.from_line
         request.side = 'RIGHT'
       }
 
+      const alreadyExists = existingComments.some(comment => {
+        const isSameBody = comment.body === request.body
+        const isSameStartLineLine = comment.start_line === request.start_line
+        const isSameeEndLine = comment.line === request.line
+        const isSame = isSameBody && isSameStartLineLine && isSameeEndLine
+        return isSame
+      })
+
+      if (alreadyExists) return
+
       const inReplyTo = existingComments.find(comment => {
         if (!comment.line) return false
-        const isSuggestionMultiline = suggestion.text.indexOf('\n') > -1
-        const isCommentMultiline = comment.body.indexOf('\n') > -1
-        if (!isSuggestionMultiline && !isCommentMultiline)
-          return comment.line === suggestion.from_line
+
+        const isSuggestionMultiline = suggestion.from_line > suggestion.to_line
+        const isGithubCommentMultiline = !!comment.start_line
+
+        if (!isSuggestionMultiline && !isGithubCommentMultiline)
+          return suggestion.from_line === comment.line
+
+        if (isGithubCommentMultiline && isGithubCommentMultiline)
+          return (
+            suggestion.from_line === comment.start_line &&
+            suggestion.to_line === comment.line
+          )
+
         return false
       })
 

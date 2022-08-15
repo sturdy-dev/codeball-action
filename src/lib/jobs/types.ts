@@ -27,6 +27,7 @@ export type Suggestion = {
   commit_id: string
   filename: string
   from_line: number
+  to_line: number
   text: string
 }
 
