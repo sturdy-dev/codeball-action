@@ -88,7 +88,7 @@ const suggestViaGitHub = async ({
         repo,
         pull_number,
         commit_id: suggestion.commit_id,
-        body: '```suggestion\n' + suggestion.text + '```\n',
+        body: '```suggestion\n' + suggestion.text,
         path: suggestion.filename
       } as {
         owner: string
