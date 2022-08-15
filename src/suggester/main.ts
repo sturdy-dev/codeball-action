@@ -5,7 +5,6 @@ import {suggest} from '../lib/github'
 import {get} from '../lib/jobs'
 import {Octokit, required} from '../lib'
 import {ForbiddenError} from '../lib/api'
-import {exists} from 'fs'
 
 const jobID = required('codeball-job-id')
 const githubToken = required('GITHUB_TOKEN')
@@ -23,8 +22,6 @@ const run = async (): Promise<void> => {
 
   const repoName = github.context.payload.repository?.name
   if (!repoName) throw new Error('No repo name found')
-
-  github.context.payload.comment?.id
 
   const pr = await octokit.pulls
     .get({
@@ -62,8 +59,6 @@ const run = async (): Promise<void> => {
     }
   })
 }
-
-const count = (str: string, substr: string) => str.split(substr).length - 1
 
 const suggestViaGitHub = async ({
   owner,
@@ -108,7 +103,7 @@ const suggestViaGitHub = async ({
         start_side?: 'LEFT' | 'RIGHT'
       }
 
-      const isSuggestionMultiline = suggestion.from_line > suggestion.to_line
+      const isSuggestionMultiline = suggestion.from_line !== suggestion.to_line
       if (isSuggestionMultiline) {
         request.start_line = suggestion.from_line
         request.start_side = 'RIGHT'
@@ -133,7 +128,6 @@ const suggestViaGitHub = async ({
       const inReplyTo = existingComments.find(comment => {
         if (!comment.line) return false
 
-        const isSuggestionMultiline = suggestion.from_line > suggestion.to_line
         const isGithubCommentMultiline = !!comment.start_line
 
         if (!isSuggestionMultiline && !isGithubCommentMultiline)
@@ -149,14 +143,19 @@ const suggestViaGitHub = async ({
       })
 
       if (inReplyTo) {
-        octokit.pulls.createReplyForReviewComment({
+        const replyRequest = {
           owner,
           repo,
           pull_number,
           body: request.body,
           comment_id: inReplyTo.id
-        })
+        }
+        octokit.pulls.createReplyForReviewComment(replyRequest)
+        core.debug(
+          `creating reply review comment ${JSON.stringify(replyRequest)}`
+        )
       } else {
+        core.debug(`creating review comment ${JSON.stringify(request)}`)
         octokit.pulls.createReviewComment(request)
       }
     })
