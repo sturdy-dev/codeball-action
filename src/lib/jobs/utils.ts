@@ -5,3 +5,5 @@ export const isFinalStatus = (st: Status): Boolean =>
 
 export const isContributionJob = (job: Job): Boolean =>
   job.contribution !== undefined
+
+export const isCommentJob = (job: Job): Boolean => job.comment !== undefined
