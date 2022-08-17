@@ -5,6 +5,10 @@ export type Features = {
   label: boolean
 }
 
+type wrappedFeatures = {
+  features: Features
+}
+
 export const features = async ({
   jobID
 }: {
@@ -16,5 +20,8 @@ export const features = async ({
       label: true
     }
   }
-  return get(`/jobs/${jobID}`).catch(error => console.warn(error))
+  const j: Promise<wrappedFeatures> = get(`/jobs/${jobID}`).catch(error =>
+    console.warn(error)
+  )
+  return j.then(({features}) => features)
 }
