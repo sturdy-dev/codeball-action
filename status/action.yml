@@ -11,6 +11,8 @@ inputs:
     required: true
 
 outputs:
+  jobType:
+    description: 'The type of Codeball job ("contribution" or "comment")'
   approved:
     description: 'If the Codeball approved the contribution (true or false)'
   suggested:
