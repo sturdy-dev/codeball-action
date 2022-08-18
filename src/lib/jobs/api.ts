@@ -10,3 +10,11 @@ export const create = ({
   url: string
   access_token: string
 }): Promise<Job> => post('/jobs', {url, access_token})
+
+export const list = (params: {
+  organization?: string
+  repository?: string
+  onlyRootJobs?: string
+  limit?: string
+}): Promise<{jobs: Job[]; next?: string}> =>
+  apiGET('/jobs', new URLSearchParams(params))

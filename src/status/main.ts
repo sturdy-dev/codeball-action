@@ -1,13 +1,37 @@
-import {isContributionJob, isFinalStatus, get, required, Job} from '../lib'
+import {
+  isContributionJob,
+  isFinalStatus,
+  get,
+  required,
+  Job,
+  isCommentJob
+} from '../lib'
 import * as core from '@actions/core'
 import {track} from '../lib/track'
+
+const isSuggested = (job: Job) =>
+  isFinalStatus(job.status) &&
+  !!job.comment &&
+  job.comment?.suggestions?.length > 0
 
 const isApproved = (job: Job): boolean =>
   isFinalStatus(job.status) &&
   isContributionJob(job) &&
   job.contribution?.result === 'approved'
 
-const run = async (jobID: string): Promise<boolean> => {
+const getJobType = (job: Job): string => {
+  if (isContributionJob(job)) {
+    return 'contribution'
+  }
+  if (isCommentJob(job)) {
+    return 'comment'
+  }
+  return 'unknown'
+}
+
+const run = async (
+  jobID: string
+): Promise<{isApproved: boolean; isSuggested: boolean; jobType: string}> => {
   core.info(`Job ID: ${jobID}`)
 
   let job = await get(jobID)
@@ -22,15 +46,21 @@ const run = async (jobID: string): Promise<boolean> => {
     job = await get(jobID)
   }
 
-  return isApproved(job)
+  return {
+    isApproved: isApproved(job),
+    isSuggested: isSuggested(job),
+    jobType: getJobType(job)
+  }
 }
 
 const jobID = required('codeball-job-id')
 
 run(jobID)
-  .then(async approved => {
+  .then(async ({isApproved, isSuggested, jobType}) => {
     await track({jobID, actionName: 'status'})
-    core.setOutput('approved', approved)
+    core.setOutput('approved', isApproved)
+    core.setOutput('suggested', isSuggested)
+    core.setOutput('jobType', jobType)
   })
   .catch(async error => {
     if (error instanceof Error) {

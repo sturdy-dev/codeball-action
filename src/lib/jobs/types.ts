@@ -14,12 +14,21 @@ export type Job = {
   error: any
   repository?: Repository
   contribution?: Contribution
+  comment?: Comment
 }
 
 export type Repository = {
   url: string
   name: string
   contribution_jobs: ContributionJob[]
+}
+
+export type Suggestion = {
+  commit_id: string
+  filename: string
+  from_line: number
+  to_line: number
+  text: string
 }
 
 export type ContributionJob = {
@@ -45,4 +54,9 @@ export type Contribution = {
   created_at: string
   merged_at: any
   result: 'inconclusive' | 'approved' | 'not_approved' | null
+}
+
+export type Comment = {
+  url: string
+  suggestions: Suggestion[]
 }

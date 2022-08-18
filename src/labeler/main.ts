@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Octokit, optional, required} from '../lib'
+import {Octokit, optional, required, features} from '../lib'
 import {label as labelViaAPI} from '../lib/github'
 import {ForbiddenError} from '../lib/api'
 import {track} from '../lib/track'
@@ -117,6 +117,14 @@ const run = async (): Promise<void> => {
   const labelDescription = required('description')
   const removeLabelNames = optional('remove-label-names')
 
+  const feats = await features({jobID})
+  if (!feats.label) {
+    core.error(
+      'Unable to run this action as the feature is not available for your organization. Please upgrade your Codeball plan, or contact support@codeball.ai'
+    )
+    return
+  }
+
   const pr = await octokit.pulls
     .get({
       owner: repoOwner,
@@ -155,8 +163,8 @@ const run = async (): Promise<void> => {
         if (error.name === ForbiddenError.name) {
           throw new Error(
             !isPrivate && isFromFork && !isToFork
-              ? 'Codeball Labler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
-              : 'Codeball Labler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+              ? 'Codeball Labeler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
+              : 'Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
           )
         }
         throw error

@@ -7,13 +7,17 @@ async function run(): Promise<{jobId: string}> {
   const pullRequestURL = github.context.payload?.pull_request?.html_url
   if (!pullRequestURL) throw new Error('No pull request URL found')
 
+  const commentURL = github.context.payload?.comment?.html_url
+
   const githubToken = core.getInput('GITHUB_TOKEN')
   if (!githubToken) throw new Error('No GitHub token found')
 
   core.info(`Found contribution: ${pullRequestURL}`)
+  if (commentURL) core.info(`Found comment: ${commentURL}`)
 
   const job = await create({
-    url: pullRequestURL,
+    // if commentURL is present, we are in the context of a comment action, so trigger that.
+    url: commentURL ?? pullRequestURL,
     access_token: githubToken
   })
 

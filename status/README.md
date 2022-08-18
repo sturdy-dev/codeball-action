@@ -13,3 +13,7 @@ The ID of the Codeball Job created by the Baller Action
 ## `approved`
 
 If the Codeball approved the contribution (true or false)
+
+## `suggested`
+
+If the Codeball has suggestions for the contribution (true or false)

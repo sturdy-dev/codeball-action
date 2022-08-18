@@ -26,3 +26,12 @@ export const label = async (params: {
     }, {} as Record<string, any>)
   return post('/github/pulls/label', body)
 }
+
+export const suggest = async (params: {link: string}) =>
+  post(
+    '/github/pulls/suggest',
+    Object.entries(params).reduce((acc, [key, value]) => {
+      acc[key] = value
+      return acc
+    }, {} as Record<string, any>)
+  )

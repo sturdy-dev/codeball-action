@@ -9,6 +9,9 @@ Codeball is a code review AI which approves Pull Requests that a human would hav
 
 The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
 
+* Identifies and **approves** safe contributions
+* _[beta]_ Generates **code suggestions** from comments ([read more](https://codeball.ai/suggester))
+
 ## GitHub Action
 
 The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if the model classifies it as safe.
@@ -22,7 +25,10 @@ The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull
 
 ```yaml
 name: Codeball
-on: [pull_request]
+on:
+  pull_request: {}
+  pull_request_review_comment:
+    types: [created, edited]
 
 jobs:
   codeball_job:
@@ -36,6 +42,7 @@ jobs:
           labelPullRequestsWhenApproved: "true"
           labelPullRequestsWhenReviewNeeded: "false"
           failJobsWhenReviewNeeded: "false"
+          codeSuggestionsFromComments: "true"
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
@@ -184,8 +191,9 @@ The Codeball sub-actions are:
 
 * [`sturdy-dev/codeball-action/baller/@v2`](./baller/README.md) – Triggers new Codeball Jobs
 * [`sturdy-dev/codeball-action/status/@v2`](./status/README.md) – Waits for the the Codeball result
-* [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) – Approves PRs
+* [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) - Approves PRs
 * [`sturdy-dev/codeball-action/labeler/@v2`](./labeler/README.md) – Adds labels to PRs
+* [`sturdy-dev/codeball-action/suggester/@v2`](./suggester/README.md) – Converts comments to code suggestions
 
 ## How Codeball works
 
@@ -212,6 +220,18 @@ permissions:
   issues: write
   pull-requests: write
 ```
+
+To allow PR approvals, make sure that **"Allow GitHub Actions to Create and Approve Pull Requests"** is enabled in the repository and organization settings on GitHub (under "Settings > Actions > General").
+
+<details>
+  <summary>Show recommended GitHub Permissions</summary>
+  
+  ![Fork pull request workflows from outside collaborators](https://user-images.githubusercontent.com/47952/184130867-8c149bfa-e827-425c-882b-eacf775c9542.png)
+![Fork pull request workflows in private repositories](https://user-images.githubusercontent.com/47952/184130872-7e91445d-4287-4b80-8c3b-6ff40fc893db.png)
+![Workflow permissions](https://user-images.githubusercontent.com/47952/184130874-54458e54-84f4-48fb-9347-0188c3ba27b6.png)
+</details>
+
+If you can not (or do not want to) update the org and repo settings for GitHub Actions, install the ["Codeball AI Writer"](https://github.com/apps/codeball-ai-writer) GitHub App on the repository. When installed, Codeball will use the permissions granted via the app instead of the GitHub Actions token.
 
 ### Forks and public repositories
 
