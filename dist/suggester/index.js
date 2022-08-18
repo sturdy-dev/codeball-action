@@ -63583,88 +63583,6 @@ XRegExp = XRegExp || (function (undef) {
 
 /***/ }),
 
-/***/ 8337:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
-const lib_1 = __nccwpck_require__(6791);
-const track_1 = __nccwpck_require__(4154);
-function run() {
-    var _a, _b, _c, _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
-        if (!pullRequestURL)
-            throw new Error('No pull request URL found');
-        const commentURL = (_d = (_c = github.context.payload) === null || _c === void 0 ? void 0 : _c.comment) === null || _d === void 0 ? void 0 : _d.html_url;
-        const githubToken = core.getInput('GITHUB_TOKEN');
-        if (!githubToken)
-            throw new Error('No GitHub token found');
-        core.info(`Found contribution: ${pullRequestURL}`);
-        if (commentURL)
-            core.info(`Found comment: ${commentURL}`);
-        const job = yield (0, lib_1.create)({
-            // if commentURL is present, we are in the context of a comment action, so trigger that.
-            url: commentURL !== null && commentURL !== void 0 ? commentURL : pullRequestURL,
-            access_token: githubToken
-        });
-        core.info(`Job created: ${job.id}`);
-        return { jobId: job.id };
-    });
-}
-run()
-    .then(({ jobId }) => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, track_1.track)({ jobID: jobId, actionName: 'baller' });
-    core.setOutput('codeball-job-id', jobId);
-    yield core.summary
-        .addLink(`Codeball Dashboard for ${process.env.GITHUB_REPOSITORY}`, `https://codeball.ai/${process.env.GITHUB_REPOSITORY}`)
-        .write();
-}))
-    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
-    yield (0, track_1.track)({ actionName: 'baller', error: error.message });
-    if (error instanceof Error) {
-        core.setFailed(error.message);
-    }
-}));
-
-
-/***/ }),
-
 /***/ 7527:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -64120,6 +64038,209 @@ const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0
     }).catch(error => console.warn(error));
 });
 exports.track = track;
+
+
+/***/ }),
+
+/***/ 9345:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const track_1 = __nccwpck_require__(4154);
+const github_1 = __nccwpck_require__(8216);
+const jobs_1 = __nccwpck_require__(6518);
+const lib_1 = __nccwpck_require__(6791);
+const api_1 = __nccwpck_require__(9095);
+const jobID = (0, lib_1.required)('codeball-job-id');
+const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
+const octokit = new lib_1.Octokit({ auth: githubToken });
+const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const pullRequestURL = (_b = (_a = github.context.payload) === null || _a === void 0 ? void 0 : _a.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
+    if (!pullRequestURL)
+        throw new Error('No pull request URL found');
+    const pullRequestNumber = (_d = (_c = github.context.payload) === null || _c === void 0 ? void 0 : _c.pull_request) === null || _d === void 0 ? void 0 : _d.number;
+    if (!pullRequestNumber)
+        throw new Error('No pull request number found');
+    const repoOwner = (_e = github.context.payload.repository) === null || _e === void 0 ? void 0 : _e.owner.login;
+    if (!repoOwner)
+        throw new Error('No repo owner found');
+    const repoName = (_f = github.context.payload.repository) === null || _f === void 0 ? void 0 : _f.name;
+    if (!repoName)
+        throw new Error('No repo name found');
+    const pr = yield octokit.pulls
+        .get({
+        owner: repoOwner,
+        repo: repoName,
+        pull_number: pullRequestNumber
+    })
+        .then(r => r.data);
+    const isPrivate = pr.base.repo.private;
+    const isFromFork = (_g = pr.head.repo) === null || _g === void 0 ? void 0 : _g.fork;
+    const isToFork = pr.base.repo.fork;
+    suggestViaGitHub({
+        owner: repoOwner,
+        repo: repoName,
+        pull_number: pullRequestNumber
+    }).catch((error) => __awaiter(void 0, void 0, void 0, function* () {
+        if (error instanceof Error &&
+            error.message === 'Resource not accessible by integration') {
+            return suggestViaAPI({ link: pullRequestURL }).catch(error => {
+                if (error.name === api_1.ForbiddenError.name) {
+                    throw new Error(!isPrivate && isFromFork && !isToFork
+                        ? 'Codeball Suggester failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to comment on Pull Requests.'
+                        : 'Codeball Suggester failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
+                }
+                throw error;
+            });
+        }
+        else {
+            core.debug(`run: unexpected error: ${typeof error}`);
+            throw error;
+        }
+    }));
+});
+const isSuggestionOutsideOfHunkError = (error) => {
+    var _a;
+    const data = (_a = error.response) === null || _a === void 0 ? void 0 : _a.data;
+    if (data.message === 'Validation Failed' &&
+        data.errors.some(e => e.message === 'pull_request_review_thread.line must be part of the diff')) {
+        return true;
+    }
+    return false;
+};
+const suggestViaGitHub = ({ owner, repo, pull_number }) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, jobs_1.get)(jobID).then((job) => __awaiter(void 0, void 0, void 0, function* () {
+        var _h;
+        const suggestions = (_h = job === null || job === void 0 ? void 0 : job.comment) === null || _h === void 0 ? void 0 : _h.suggestions;
+        if (!suggestions)
+            return;
+        if (suggestions.length === 0)
+            return;
+        const existingComments = yield octokit.pulls
+            .listReviewComments({
+            owner,
+            repo,
+            pull_number
+        })
+            .then(r => r.data);
+        suggestions.forEach(suggestion => {
+            const request = {
+                owner,
+                repo,
+                pull_number,
+                commit_id: suggestion.commit_id,
+                body: 'Suggestion from [Codeball](https://codeball.ai/) _(beta)_\n\n```suggestion\n' +
+                    suggestion.text +
+                    '```\n',
+                path: suggestion.filename
+            };
+            const isSuggestionMultiline = suggestion.from_line !== suggestion.to_line;
+            if (isSuggestionMultiline) {
+                request.start_line = suggestion.from_line;
+                request.start_side = 'RIGHT';
+                request.line = suggestion.to_line;
+                request.side = 'RIGHT';
+            }
+            else {
+                request.line = suggestion.from_line;
+                request.side = 'RIGHT';
+            }
+            const alreadyExists = existingComments.some(comment => {
+                const isSameBody = (0, lib_1.eq)(comment.body, request.body);
+                const isSameStartLine = (0, lib_1.eq)(comment.start_line, request.start_line);
+                const isSameEndLine = (0, lib_1.eq)(comment.line, request.line);
+                const isSame = isSameBody && isSameStartLine && isSameEndLine;
+                return isSame;
+            });
+            if (alreadyExists)
+                return;
+            const inReplyTo = existingComments.find(comment => {
+                if (!comment.line)
+                    return false;
+                const isGithubCommentMultiline = !!comment.start_line;
+                if (!isSuggestionMultiline && !isGithubCommentMultiline)
+                    return suggestion.from_line === comment.line;
+                if (isGithubCommentMultiline && isGithubCommentMultiline)
+                    return (suggestion.from_line === comment.start_line &&
+                        suggestion.to_line === comment.line);
+                return false;
+            });
+            if (inReplyTo) {
+                const replyRequest = {
+                    owner,
+                    repo,
+                    pull_number,
+                    body: request.body,
+                    comment_id: inReplyTo.id
+                };
+                core.debug(`creating reply review comment ${JSON.stringify(replyRequest)}`);
+                octokit.pulls.createReplyForReviewComment(replyRequest).catch(error => {
+                    core.debug('createReplyForReviewComment failed: ' + JSON.stringify(error));
+                    throw error;
+                });
+            }
+            else {
+                core.debug(`creating review comment ${JSON.stringify(request)}`);
+                octokit.pulls
+                    .createReviewComment(request)
+                    .catch((error) => {
+                    if (isSuggestionOutsideOfHunkError(error)) {
+                        core.warning("Tried to make a suggestion to a line outside of the PR's hunk, skipping");
+                        return;
+                    }
+                    core.debug('createReviewComment failed: ' + JSON.stringify(error));
+                    throw error;
+                });
+            }
+        });
+    }));
+});
+const suggestViaAPI = ({ link }) => (0, github_1.suggest)({ link });
+run()
+    .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'suggester' }); }))
+    .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
+    if (error instanceof Error) {
+        yield (0, track_1.track)({ jobID, actionName: 'suggester', error: error.message });
+        core.setFailed(error.message);
+    }
+}));
 
 
 /***/ }),
@@ -67298,7 +67419,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(8337);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(9345);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

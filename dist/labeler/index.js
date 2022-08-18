@@ -33206,7 +33206,7 @@ exports["default"] = get;
 
 /***/ }),
 
-/***/ 2253:
+/***/ 878:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -33669,7 +33669,7 @@ const debug_1 = __importDefault(__nccwpck_require__(8237));
 const url_1 = __nccwpck_require__(7310);
 // Built-in protocols
 const data_1 = __importDefault(__nccwpck_require__(5525));
-const file_1 = __importDefault(__nccwpck_require__(2253));
+const file_1 = __importDefault(__nccwpck_require__(878));
 const ftp_1 = __importDefault(__nccwpck_require__(9886));
 const http_1 = __importDefault(__nccwpck_require__(3582));
 const https_1 = __importDefault(__nccwpck_require__(5227));
@@ -63704,6 +63704,11 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     const labelColor = (0, lib_1.required)('color');
     const labelDescription = (0, lib_1.required)('description');
     const removeLabelNames = (0, lib_1.optional)('remove-label-names');
+    const feats = yield (0, lib_1.features)({ jobID });
+    if (!feats.label) {
+        core.error('Unable to run this action as the feature is not available for your organization. Please upgrade your Codeball plan, or contact support@codeball.ai');
+        return;
+    }
     const pr = yield octokit.pulls
         .get({
         owner: repoOwner,
@@ -63737,8 +63742,8 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
             }).catch(error => {
                 if (error.name === api_1.ForbiddenError.name) {
                     throw new Error(!isPrivate && isFromFork && !isToFork
-                        ? 'Codeball Labler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
-                        : 'Codeball Labler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
+                        ? 'Codeball Labeler failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to label Pull Requests.'
+                        : 'Codeball Labeler failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.');
                 }
                 throw error;
             });
@@ -63886,8 +63891,8 @@ const handleResponse = (response) => __awaiter(void 0, void 0, void 0, function*
         throw new Error(yield response.text());
     }
 });
-const get = (path) => __awaiter(void 0, void 0, void 0, function* () {
-    return (0, node_fetch_1.default)(new URL(path, BASE_URL).toString(), {
+const get = (path, params = new URLSearchParams()) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, node_fetch_1.default)(new URL(path, BASE_URL).toString() + `?${params.toString()}}`, {
         headers: {
             'User-Agent': 'github-actions'
         },
@@ -63907,6 +63912,85 @@ const post = (path, body) => __awaiter(void 0, void 0, void 0, function* () {
     }).then(handleResponse);
 });
 exports.post = post;
+
+
+/***/ }),
+
+/***/ 2598:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.eq = void 0;
+// eq is an equality check, but treats null and undefined as equal
+const eq = (a, b) => {
+    if (a === null) {
+        a = undefined;
+    }
+    if (b === null) {
+        b = undefined;
+    }
+    return a === b;
+};
+exports.eq = eq;
+
+
+/***/ }),
+
+/***/ 8176:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__nccwpck_require__(2598), exports);
+
+
+/***/ }),
+
+/***/ 9750:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.features = void 0;
+const api_1 = __nccwpck_require__(9095);
+const features = ({ jobID }) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!jobID) {
+        return {
+            approve: true,
+            label: true
+        };
+    }
+    const j = (0, api_1.get)(`/jobs/${jobID}`).catch(error => console.warn(error));
+    return j.then(({ features }) => features);
+});
+exports.features = features;
 
 
 /***/ }),
@@ -63951,7 +64035,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.label = exports.approve = void 0;
+exports.suggest = exports.label = exports.approve = void 0;
 const api_1 = __nccwpck_require__(9095);
 const approve = ({ link, message }) => __awaiter(void 0, void 0, void 0, function* () {
     const body = message ? { link, message } : { link };
@@ -63968,6 +64052,13 @@ const label = (params) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)('/github/pulls/label', body);
 });
 exports.label = label;
+const suggest = (params) => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, api_1.post)('/github/pulls/suggest', Object.entries(params).reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+    }, {}));
+});
+exports.suggest = suggest;
 
 
 /***/ }),
@@ -63997,6 +64088,8 @@ __exportStar(__nccwpck_require__(6518), exports);
 __exportStar(__nccwpck_require__(3769), exports);
 __exportStar(__nccwpck_require__(4154), exports);
 __exportStar(__nccwpck_require__(8216), exports);
+__exportStar(__nccwpck_require__(9750), exports);
+__exportStar(__nccwpck_require__(8176), exports);
 
 
 /***/ }),
@@ -64007,12 +64100,14 @@ __exportStar(__nccwpck_require__(8216), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.create = exports.get = void 0;
+exports.list = exports.create = exports.get = void 0;
 const api_1 = __nccwpck_require__(9095);
 const get = (id) => (0, api_1.get)(`/jobs/${id}`);
 exports.get = get;
 const create = ({ url, access_token }) => (0, api_1.post)('/jobs', { url, access_token });
 exports.create = create;
+const list = (params) => (0, api_1.get)('/jobs', new URLSearchParams(params));
+exports.list = list;
 
 
 /***/ }),
@@ -64040,57 +64135,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(3006), exports);
 __exportStar(__nccwpck_require__(6915), exports);
 __exportStar(__nccwpck_require__(4319), exports);
-__exportStar(__nccwpck_require__(7616), exports);
-
-
-/***/ }),
-
-/***/ 5465:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.list = void 0;
-const api_1 = __nccwpck_require__(9095);
-const list = (jobId) => (0, api_1.get)(`/jobs/${jobId}/messages`);
-exports.list = list;
-
-
-/***/ }),
-
-/***/ 7616:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__nccwpck_require__(5465), exports);
-__exportStar(__nccwpck_require__(878), exports);
-
-
-/***/ }),
-
-/***/ 878:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
@@ -64111,11 +64155,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isContributionJob = exports.isFinalStatus = void 0;
+exports.isCommentJob = exports.isContributionJob = exports.isFinalStatus = void 0;
 const isFinalStatus = (st) => st === 'failure' || st === 'success';
 exports.isFinalStatus = isFinalStatus;
 const isContributionJob = (job) => job.contribution !== undefined;
 exports.isContributionJob = isContributionJob;
+const isCommentJob = (job) => job.comment !== undefined;
+exports.isCommentJob = isCommentJob;
 
 
 /***/ }),
