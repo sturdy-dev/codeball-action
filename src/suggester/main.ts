@@ -144,9 +144,9 @@ const suggestViaGitHub = async ({
 
       const alreadyExists = existingComments.some(comment => {
         const isSameBody = eq(comment.body, request.body)
-        const isSameStartLineLine = eq(comment.start_line, request.start_line)
+        const isSameStartLine = eq(comment.start_line, request.start_line)
         const isSameEndLine = eq(comment.line, request.line)
-        const isSame = isSameBody && isSameStartLineLine && isSameEndLine
+        const isSame = isSameBody && isSameStartLine && isSameEndLine
         return isSame
       })
 
