@@ -4,7 +4,7 @@ import {RequestError} from '@octokit/request-error'
 import {track} from '../lib/track'
 import {suggest} from '../lib/github'
 import {get} from '../lib/jobs'
-import {Octokit, required} from '../lib'
+import {Octokit, required, eq} from '../lib'
 import {ForbiddenError} from '../lib/api'
 
 const jobID = required('codeball-job-id')
@@ -94,7 +94,7 @@ const suggestViaGitHub = async ({
   pull_number: number
 }) =>
   get(jobID).then(async job => {
-    let suggestions = job?.comment?.suggestions
+    const suggestions = job?.comment?.suggestions
     if (!suggestions) return
     if (suggestions.length === 0) return
 
@@ -143,11 +143,10 @@ const suggestViaGitHub = async ({
       }
 
       const alreadyExists = existingComments.some(comment => {
-        const isSameBody = comment.body === request.body
-        // NOTE: == is intentional, we want to treat undefined and null as equal
-        const isSameStartLine = comment.start_line == request.start_line
-        const isSameEndLine = comment.line === request.line
-        const isSame = isSameBody && isSameStartLine && isSameEndLine
+        const isSameBody = eq(comment.body, request.body)
+        const isSameStartLineLine = eq(comment.start_line, request.start_line)
+        const isSameEndLine = eq(comment.line, request.line)
+        const isSame = isSameBody && isSameStartLineLine && isSameEndLine
         return isSame
       })
 
