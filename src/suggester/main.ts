@@ -112,7 +112,10 @@ const suggestViaGitHub = async ({
         repo,
         pull_number,
         commit_id: suggestion.commit_id,
-        body: '```suggestion\n' + suggestion.text + '```\n',
+        body:
+          'Suggestion from [Codeball](https://codeball.ai/) _(beta)_\n\n```suggestion\n' +
+          suggestion.text +
+          '```\n',
         path: suggestion.filename
       } as {
         owner: string
