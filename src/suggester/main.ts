@@ -144,9 +144,10 @@ const suggestViaGitHub = async ({
 
       const alreadyExists = existingComments.some(comment => {
         const isSameBody = comment.body === request.body
-        const isSameStartLineLine = comment.start_line === request.start_line
+        // NOTE: == is intentional, we want to treat undefined and null as equal
+        const isSameStartLine = comment.start_line == request.start_line
         const isSameEndLine = comment.line === request.line
-        const isSame = isSameBody && isSameStartLineLine && isSameEndLine
+        const isSame = isSameBody && isSameStartLine && isSameEndLine
         return isSame
       })
 
