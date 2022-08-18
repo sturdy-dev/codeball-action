@@ -9,6 +9,9 @@ Codeball is a code review AI which approves Pull Requests that a human would hav
 
 The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
 
+* Identifies and **approves** safe contributions
+* _[beta]_ Generates **code suggestions** from comments ([read more](https://codeball.ai/suggester))
+
 ## GitHub Action
 
 The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull Requests, and approves the Pull Request ([example](https://github.com/sturdy-dev/codeball-action/pull/7)) if the model classifies it as safe.
@@ -22,7 +25,10 @@ The Codeball GitHub Action runs [Codeball](https://codeball.ai/) on all new Pull
 
 ```yaml
 name: Codeball
-on: [pull_request]
+on:
+  pull_request: {}
+  pull_request_review_comment:
+    types: [created, edited]
 
 jobs:
   codeball_job:
@@ -36,6 +42,7 @@ jobs:
           labelPullRequestsWhenApproved: "true"
           labelPullRequestsWhenReviewNeeded: "false"
           failJobsWhenReviewNeeded: "false"
+          codeSuggestionsFromComments: "true"
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
@@ -184,8 +191,9 @@ The Codeball sub-actions are:
 
 * [`sturdy-dev/codeball-action/baller/@v2`](./baller/README.md) – Triggers new Codeball Jobs
 * [`sturdy-dev/codeball-action/status/@v2`](./status/README.md) – Waits for the the Codeball result
-* [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) – Approves PRs
+* [`sturdy-dev/codeball-action/approver/@v2`](./approver/README.md) - Approves PRs
 * [`sturdy-dev/codeball-action/labeler/@v2`](./labeler/README.md) – Adds labels to PRs
+* [`sturdy-dev/codeball-action/suggester/@v2`](./suggester/README.md) – Converts comments to code suggestions
 
 ## How Codeball works
 
