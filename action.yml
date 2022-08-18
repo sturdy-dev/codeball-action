@@ -24,6 +24,10 @@ inputs:
     description: 'If "true", the action will exit with status code 1 if the Codeball AI does not approve the contribution'
     default: "false"
     required: false
+  codeSuggestionsFromComments:
+    description: 'If "true", Codeball will read generate code suggestions from comments made in Pull Requests'
+    default: "false"
+    required: false
 
 runs:
   using: 'composite'
@@ -45,7 +49,7 @@ runs:
     # If Codeball approved the contribution, add a "codeball:approved" label
     - name: Label Approved
       uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.labelPullRequestsWhenApproved == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.labelPullRequestsWhenApproved == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
       with:
         name: "codeball:approved"
         color: "86efac" # green
@@ -55,7 +59,7 @@ runs:
     # If Codeball did not approve the contribution, add a "codeball:needs-review" label
     - name: Label Needs Review
       uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.labelPullRequestsWhenReviewNeeded == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.labelPullRequestsWhenReviewNeeded == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
       with:
         name: "codeball:needs-review"
         color: "bfdbfe" # blue
@@ -65,14 +69,21 @@ runs:
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
       uses: sturdy-dev/codeball-action/approver@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.approvePullRequests == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.approvePullRequests == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
+      with:
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+    # If Codeball have code suggestions, add suggestions as comments
+    - name: Add Suggestions
+      uses: sturdy-dev/codeball-action/suggester@v2
+      if: ${{ steps.codeball_status.outputs.suggested == 'true' && inputs.codeSuggestionsFromComments == 'true' && steps.codeball_status.outputs.jobType == 'comment' }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If Codeball didn't approve the contribution, fail the job.
     - name: Fail Job
       shell: bash
-      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.failJobsWhenReviewNeeded == 'true' }}
+      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.failJobsWhenReviewNeeded == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
       run: |
         echo "Not approved"
         exit 1
