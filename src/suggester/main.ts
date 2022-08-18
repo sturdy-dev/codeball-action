@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import {RequestError} from '@octokit/request-error'
 import {track} from '../lib/track'
 import {suggest} from '../lib/github'
 import {get} from '../lib/jobs'
@@ -55,9 +56,32 @@ const run = async (): Promise<void> => {
         throw error
       })
     } else {
+      core.debug(`run: unexpected error: ${typeof error}`)
       throw error
     }
   })
+}
+
+type requestError = {
+  message: string
+  errors: {
+    resource: string
+    message: string
+  }[]
+}
+
+const isSuggestionOutsideOfHunkError = (error: RequestError): boolean => {
+  const data = error.response?.data as requestError
+  if (
+    data.message === 'Validation Failed' &&
+    data.errors.some(
+      e =>
+        e.message === 'pull_request_review_thread.line must be part of the diff'
+    )
+  ) {
+    return true
+  }
+  return false
 }
 
 const suggestViaGitHub = async ({
@@ -118,8 +142,8 @@ const suggestViaGitHub = async ({
       const alreadyExists = existingComments.some(comment => {
         const isSameBody = comment.body === request.body
         const isSameStartLineLine = comment.start_line === request.start_line
-        const isSameeEndLine = comment.line === request.line
-        const isSame = isSameBody && isSameStartLineLine && isSameeEndLine
+        const isSameEndLine = comment.line === request.line
+        const isSame = isSameBody && isSameStartLineLine && isSameEndLine
         return isSame
       })
 
@@ -150,13 +174,31 @@ const suggestViaGitHub = async ({
           body: request.body,
           comment_id: inReplyTo.id
         }
-        octokit.pulls.createReplyForReviewComment(replyRequest)
+
         core.debug(
           `creating reply review comment ${JSON.stringify(replyRequest)}`
         )
+        octokit.pulls.createReplyForReviewComment(replyRequest).catch(error => {
+          core.debug(
+            'createReplyForReviewComment failed: ' + JSON.stringify(error)
+          )
+          throw error
+        })
       } else {
         core.debug(`creating review comment ${JSON.stringify(request)}`)
-        octokit.pulls.createReviewComment(request)
+        octokit.pulls
+          .createReviewComment(request)
+          .catch((error: RequestError) => {
+            if (isSuggestionOutsideOfHunkError(error)) {
+              core.warning(
+                "Tried to make a suggestion to a line outside of the PR's hunk, skipping"
+              )
+              return
+            }
+
+            core.debug('createReviewComment failed: ' + JSON.stringify(error))
+            throw error
+          })
       }
     })
   })
