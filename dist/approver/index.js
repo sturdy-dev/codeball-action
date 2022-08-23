@@ -63631,12 +63631,10 @@ const messages_1 = __nccwpck_require__(7616);
 const jobID = (0, lib_1.optional)('codeball-job-id');
 const defaultMessages = [
     (0, lib_1.required)('message'),
-    '<hr />',
-    `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
+    `> [[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})]`
 ];
 const getServerSideMessages = (jobId) => (0, messages_1.list)(jobId).then(messages => [
     (0, lib_1.required)('message'),
-    '<hr />',
     ...messages.map(message => message.text)
 ]);
 const getMessages = (jobId) => jobId
