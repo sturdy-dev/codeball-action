@@ -10,14 +10,12 @@ const jobID = optional('codeball-job-id')
 
 const defaultMessages = [
   required('message'),
-  '<hr />',
-  `[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})`
+  `> [[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})]`
 ]
 
 const getServerSideMessages = (jobId: string) =>
   listMessages(jobId).then(messages => [
     required('message'),
-    '<hr />',
     ...messages.map(message => message.text)
   ])
 
