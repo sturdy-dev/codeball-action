@@ -126,7 +126,7 @@ const suggestViaGitHub = async ({
         path: string
         start_line?: number
         side?: 'LEFT' | 'RIGHT'
-        line?: number
+        line: number
         start_side?: 'LEFT' | 'RIGHT'
       }
 
