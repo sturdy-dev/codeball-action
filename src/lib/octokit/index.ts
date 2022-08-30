@@ -1,11 +1,21 @@
 import {Octokit as Core} from '@octokit/core'
 import {paginateRest} from '@octokit/plugin-paginate-rest'
 import {legacyRestEndpointMethods} from '@octokit/plugin-rest-endpoint-methods'
-import ProxyAgent from 'proxy-agent'
+
+const HttpsProxyAgent = require('https-proxy-agent')
 
 const DEFAULTS = {
   baseUrl: getApiBaseUrl()
 }
+
+const httpProxy = process.env['HTTP_PROXY'] || process.env['http_proxy']
+const httpsProxy = process.env['HTTPS_PROXY'] || process.env['https_proxy']
+
+const proxy = httpProxy
+  ? new HttpsProxyAgent(httpProxy)
+  : httpsProxy
+  ? new HttpsProxyAgent(httpProxy)
+  : undefined
 
 export const Octokit = Core.plugin(
   paginateRest,
@@ -15,7 +25,7 @@ export const Octokit = Core.plugin(
     ...DEFAULTS,
     ...options,
     request: {
-      agent: new ProxyAgent(),
+      agent: proxy,
       ...options.request
     }
   }
