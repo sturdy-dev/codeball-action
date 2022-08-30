@@ -609,26 +609,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@octokit/action@^4.0.7":
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-4.0.7.tgz#2c9d07149269b9b76d3cf08d311ea17a0ed4b9c7"
-  integrity sha512-u2QVAK4kj5eSxuhjYIwesGMxPZ3Cnxx3smbR0XQi36nV/G0+f1ntUXjrwqY23FTHFP5YuMWSkbHhOZnkMmKFuA==
-  dependencies:
-    "@octokit/auth-action" "^2.0.0"
-    "@octokit/core" "^4.0.0"
-    "@octokit/plugin-paginate-rest" "^4.0.0"
-    "@octokit/plugin-rest-endpoint-methods" "^6.0.0"
-    "@octokit/types" "^7.0.0"
-    https-proxy-agent "^5.0.1"
-
-"@octokit/auth-action@^2.0.0":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@octokit/auth-action/-/auth-action-2.0.1.tgz#6b4757713b5067c022787806c2c666affb73f716"
-  integrity sha512-nh5UTN22jK7ll2BR+zS7yZXB6u9q2lsI+teOhdC/JCfws8guKjH3NynV0ipwERnwP11/GiHJ48Ji+HC5+R92ag==
-  dependencies:
-    "@octokit/auth-token" "^3.0.0"
-    "@octokit/types" "^7.0.0"
-
 "@octokit/auth-token@^2.4.4":
   version "2.5.0"
   resolved "https://registry.npmjs.org/@octokit/auth-token/-/auth-token-2.5.0.tgz"
@@ -656,7 +636,7 @@
     before-after-hook "^2.2.0"
     universal-user-agent "^6.0.0"
 
-"@octokit/core@^4.0.0", "@octokit/core@^4.0.5":
+"@octokit/core@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@octokit/core/-/core-4.0.5.tgz#589e68c0a35d2afdcd41dafceab072c2fbc6ab5f"
   integrity sha512-4R3HeHTYVHCfzSAi0C6pbGXV8UDI5Rk+k3G7kLVNckswN9mvpOzW9oENfjfH3nEmzg8y3AmKmzs8Sg6pLCeOCA==
@@ -722,7 +702,7 @@
   dependencies:
     "@octokit/types" "^6.34.0"
 
-"@octokit/plugin-paginate-rest@^4.0.0":
+"@octokit/plugin-paginate-rest@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-4.1.0.tgz#670ac9ac369448c69a2371bfcd7e2b37d95534f2"
   integrity sha512-2O5K5fpajYG5g62wjzHR7/cWYaCA88CextAW3vFP+yoIHD0KEdlVMHfM5/i5LyV+JMmqiYW7w5qfg46FR+McNw==
@@ -737,7 +717,7 @@
     "@octokit/types" "^6.34.0"
     deprecation "^2.3.1"
 
-"@octokit/plugin-rest-endpoint-methods@^6.0.0", "@octokit/plugin-rest-endpoint-methods@^6.3.0":
+"@octokit/plugin-rest-endpoint-methods@^6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@octokit/plugin-rest-endpoint-methods/-/plugin-rest-endpoint-methods-6.3.0.tgz#81549334ce020169b84bd4a7fa2577e9d725d829"
   integrity sha512-qEu2wn6E7hqluZwIEUnDxWROvKjov3zMIAi4H4d7cmKWNMeBprEXZzJe8pE5eStUYC1ysGhD0B7L6IeG1Rfb+g==
@@ -1067,7 +1047,7 @@ acorn@^8.7.1:
 
 agent-base@6:
   version "6.0.2"
-  resolved "https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
   integrity sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==
   dependencies:
     debug "4"
