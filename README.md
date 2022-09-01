@@ -160,7 +160,7 @@ jobs:
 ### Example: Skip Draft pull requests
 
 <details>
-  <summary>▶️ cskip-drafts.yml</summary>
+  <summary>▶️ skip-drafts.yml</summary>
 
 ```yaml
 name: Codeball
