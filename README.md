@@ -42,7 +42,7 @@ jobs:
           labelPullRequestsWhenApproved: "true"
           labelPullRequestsWhenReviewNeeded: "false"
           failJobsWhenReviewNeeded: "false"
-          codeSuggestionsFromComments: "true"
+          codeSuggestionsFromComments: "false" # Beta (set to "true" to enable)
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
@@ -160,7 +160,7 @@ jobs:
 ### Example: Skip Draft pull requests
 
 <details>
-  <summary>▶️ cskip-drafts.yml</summary>
+  <summary>▶️ skip-drafts.yml</summary>
 
 ```yaml
 name: Codeball

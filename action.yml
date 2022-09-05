@@ -25,7 +25,7 @@ inputs:
     default: "false"
     required: false
   codeSuggestionsFromComments:
-    description: 'If "true", Codeball will read generate code suggestions from comments made in Pull Requests'
+    description: 'If "true", Codeball will read generate code suggestions from comments made in Pull Requests (beta)'
     default: "false"
     required: false
 
