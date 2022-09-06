@@ -727,12 +727,12 @@
   dependencies:
     "@octokit/types" "^6.34.0"
 
-"@octokit/plugin-paginate-rest@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-4.1.0.tgz#670ac9ac369448c69a2371bfcd7e2b37d95534f2"
-  integrity sha512-2O5K5fpajYG5g62wjzHR7/cWYaCA88CextAW3vFP+yoIHD0KEdlVMHfM5/i5LyV+JMmqiYW7w5qfg46FR+McNw==
+"@octokit/plugin-paginate-rest@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-4.2.0.tgz#41fc6ca312446a85a4275aca698b4d9c4c5e06ab"
+  integrity sha512-8otLCIK9esfmOCY14CBnG/xPqv0paf14rc+s9tHpbOpeFwrv5CnECKW1qdqMAT60ngAa9eB1bKQ+l2YCpi0HPQ==
   dependencies:
-    "@octokit/types" "^7.1.1"
+    "@octokit/types" "^7.2.0"
 
 "@octokit/plugin-rest-endpoint-methods@^5.13.0":
   version "5.13.0"
@@ -799,7 +799,7 @@
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
 
-"@octokit/types@^7.0.0", "@octokit/types@^7.1.1", "@octokit/types@^7.2.0":
+"@octokit/types@^7.0.0", "@octokit/types@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@octokit/types/-/types-7.2.0.tgz#7ee0fc27f9f463d7ccf12ca5956988d498b3c6c4"
   integrity sha512-pYQ/a1U6mHptwhGyp6SvsiM4bWP2s3V95olUeTxas85D/2kN78yN5C8cGN+P4LwJSWUqIEyvq0Qn2WUn6NQRjw==
