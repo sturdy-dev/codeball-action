@@ -54,9 +54,14 @@ export type Contribution = {
   created_at: string
   merged_at: any
   result: 'inconclusive' | 'approved' | 'not_approved' | null
+  predicted_outcome?: PredictedOutcome
 }
 
 export type Comment = {
   url: string
   suggestions: Suggestion[]
+}
+
+export type PredictedOutcome = {
+  file_probabilities?: number[]
 }
