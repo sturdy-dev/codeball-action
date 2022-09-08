@@ -29,13 +29,13 @@ inputs:
     required: false
 
   approveThreshold:
-    description: 'The threshold to use for "approving" (greater than or equal to). A number between 0 and 1.'
+    description: 'The threshold to use for "approving" (greater than or equal to). A number between 0 and 1. Must be specified with 3 decimals.'
     default: "0.935"
     required: false
 
   carefulReviewThreshold:
-    description: 'The threshold to use for "careful review" actions (less than). A number between 0 and 1.'
-    default: "0.3"
+    description: 'The threshold to use for "careful review" actions (less than). A number between 0 and 1. Must be specified with 3 decimals.'
+    default: "0.300"
     required: false
 
   failJobsWhenReviewNeeded:

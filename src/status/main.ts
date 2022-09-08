@@ -82,7 +82,7 @@ run(jobID)
     core.setOutput('approved', isApproved)
     core.setOutput('suggested', isSuggested)
     core.setOutput('jobType', jobType)
-    core.setOutput('confidence', confidence)
+    core.setOutput('confidence', confidence.toFixed(3))
   })
   .catch(async error => {
     if (error instanceof Error) {
