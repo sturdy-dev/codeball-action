@@ -3,7 +3,7 @@
 [![Discord](https://img.shields.io/badge/join-Discord-blue.svg)](https://discord.gg/nE4UcQHZtV)
 
 
-# CODEBALL &mdash; AI CODE REVIEW 🔮
+# 🔮 Codeball &mdash; AI Code Review 
 
 Codeball is a code review AI that scores Pull Requests on a grade from 0 _(needs careful review)_ to 1 _(you should merge this!)_
 
