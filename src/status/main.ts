@@ -29,9 +29,23 @@ const getJobType = (job: Job): string => {
   return 'unknown'
 }
 
+const getConfidence = (job: Job): number => {
+  if (isContributionJob(job)) {
+    const probabilities =
+      job.contribution?.predicted_outcome?.file_probabilities || []
+    return Math.min(...probabilities)
+  }
+  return 0
+}
+
 const run = async (
   jobID: string
-): Promise<{isApproved: boolean; isSuggested: boolean; jobType: string}> => {
+): Promise<{
+  isApproved: boolean
+  isSuggested: boolean
+  jobType: string
+  confidence: number
+}> => {
   core.info(`Job ID: ${jobID}`)
 
   let job = await get(jobID)
@@ -49,18 +63,20 @@ const run = async (
   return {
     isApproved: isApproved(job),
     isSuggested: isSuggested(job),
-    jobType: getJobType(job)
+    jobType: getJobType(job),
+    confidence: getConfidence(job)
   }
 }
 
 const jobID = required('codeball-job-id')
 
 run(jobID)
-  .then(async ({isApproved, isSuggested, jobType}) => {
+  .then(async ({isApproved, isSuggested, jobType, confidence}) => {
     await track({jobID, actionName: 'status'})
     core.setOutput('approved', isApproved)
     core.setOutput('suggested', isSuggested)
     core.setOutput('jobType', jobType)
+    core.setOutput('confidence', confidence)
   })
   .catch(async error => {
     if (error instanceof Error) {

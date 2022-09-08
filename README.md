@@ -3,14 +3,17 @@
 [![Discord](https://img.shields.io/badge/join-Discord-blue.svg)](https://discord.gg/nE4UcQHZtV)
 
 
-# CODEBALL &mdash; AI CODE REVIEW 🔮
+# 🔮 Codeball &mdash; AI Code Review 
 
-Codeball is a code review AI which approves Pull Requests that a human would have approved. Spend less time waiting, save time and money.
+Codeball is a code review AI that scores Pull Requests on a grade from 0 _(needs careful review)_ to 1 _(you should merge this!)_
 
-The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
+Use Codeball to add labels to help you focus, to auto approve PRs, and more. The Codeball action is easy to use (sane defaults), and is highly customizeable to fit your workflow when needed.
 
-* Identifies and **approves** safe contributions
-* _[beta]_ Generates **code suggestions** from comments ([read more](https://codeball.ai/suggester))
+🏷 Labels PRs when you should **review with caution**  – Stay sharp, don't let the bugs pass through!
+
+✅ Identifies and **approves** or labels safe PRs – Save time by fast-tracking PRs that are easy to review
+
+🏖 **Great defaults**, fully customizable and programmable with GitHub Actions  
 
 ## GitHub Action
 
@@ -38,11 +41,11 @@ jobs:
       - name: Codeball
         uses: sturdy-dev/codeball-action@v2
         with:
+          # For all configuration options see https://github.com/sturdy-dev/codeball-action/blob/v2/action.yml
           approvePullRequests: "true"
           labelPullRequestsWhenApproved: "true"
           labelPullRequestsWhenReviewNeeded: "false"
           failJobsWhenReviewNeeded: "false"
-          codeSuggestionsFromComments: "false" # Beta (set to "true" to enable)
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
