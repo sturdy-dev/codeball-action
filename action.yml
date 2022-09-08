@@ -12,18 +12,37 @@ inputs:
     description: 'If "true", the action will submit an approving review if the Codeball AI approves the contribution'
     default: "true"
     required: false
+
   labelPullRequestsWhenApproved:
-    description: 'If "true", the action will add `codeball:approved` label to the Pull Request if Codeball AI approves the contribution'
+    description: 'If "true", the action will add `codeball:approved` label to the PR if the Codeball AI confidence is above the configured approve threshold'
     default: "true"
     required: false
+
   labelPullRequestsWhenReviewNeeded:
-    description: 'If "true", the action will add `codeball:needs-review` label to the Pull Request if the Codeball AI approves the contribution'
+    description: 'If "true", the action will add `codeball:needs-review` label to the PR if the Codeball AI confidence is between the "approve" and "careful" thresholds'
     default: "false"
     required: false
+
+  labelPullRequestsWhenCarefulReviewNeeded:
+    description: 'If "true", the action will add `codeball:needs-careful-review` label to the PR if the Codeball AI confidence is below the configured careful threshold'
+    default: "true"
+    required: false
+
+  approveThreshold:
+    description: 'The threshold to use for "approving" (greater than or equal to). A number between 0 and 1. Must be specified with 3 decimals.'
+    default: "0.935"
+    required: false
+
+  carefulReviewThreshold:
+    description: 'The threshold to use for "careful review" actions (less than). A number between 0 and 1. Must be specified with 3 decimals.'
+    default: "0.300"
+    required: false
+
   failJobsWhenReviewNeeded:
     description: 'If "true", the action will exit with status code 1 if the Codeball AI does not approve the contribution'
     default: "false"
     required: false
+
   codeSuggestionsFromComments:
     description: 'If "true", Codeball will read generate code suggestions from comments made in Pull Requests (beta)'
     default: "false"
@@ -46,30 +65,43 @@ runs:
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
-    # If Codeball approved the contribution, add a "codeball:approved" label
+    # If the Codeball confidence is high, add the "codeball:approved" label
     - name: Label Approved
       uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.labelPullRequestsWhenApproved == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
+      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenApproved == 'true' && steps.codeball_status.outputs.confidence >= inputs.approveThreshold  }}
       with:
         name: "codeball:approved"
         color: "86efac" # green
-        remove-label-names: "codeball:needs-review"
+        remove-label-names: "codeball:needs-review,codeball:needs-careful-review"
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
-    # If Codeball did not approve the contribution, add a "codeball:needs-review" label
+
+    # If the Codeball confidence is medium, add the "codeball:needs-review" label
     - name: Label Needs Review
       uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'false' && inputs.labelPullRequestsWhenReviewNeeded == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
+      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenReviewNeeded == 'true' && steps.codeball_status.outputs.confidence >= inputs.carefulReviewThreshold && steps.codeball_status.outputs.confidence < inputs.approveThreshold  }}
       with:
         name: "codeball:needs-review"
         color: "bfdbfe" # blue
-        remove-label-names: "codeball:approved"
+        remove-label-names: "codeball:approved,codeball:needs-careful-review"
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
+
+    # If the Codeball confidence is low, add the "codeball:needs-careful-review" label
+    - name: Label Needs Careful Review
+      uses: sturdy-dev/codeball-action/labeler@v2
+      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenCarefulReviewNeeded == 'true' && steps.codeball_status.outputs.confidence < inputs.carefulReviewThreshold }}
+      with:
+        name: "codeball:needs-careful-review"
+        color: "fde68a" # amber
+        remove-label-names: "codeball:approved,codeball:needs-review"
+        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
       uses: sturdy-dev/codeball-action/approver@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' && inputs.approvePullRequests == 'true' && steps.codeball_status.outputs.jobType == 'contribution' }}
+      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.approvePullRequests == 'true' && steps.codeball_status.outputs.confidence >= inputs.approveThreshold }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
