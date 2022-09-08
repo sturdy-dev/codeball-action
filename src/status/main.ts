@@ -83,6 +83,7 @@ run(jobID)
     core.setOutput('suggested', isSuggested)
     core.setOutput('jobType', jobType)
     core.setOutput('confidence', confidence.toFixed(3))
+    core.info(`Confidence: ${confidence.toFixed(3)}`)
   })
   .catch(async error => {
     if (error instanceof Error) {
