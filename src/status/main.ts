@@ -1,10 +1,10 @@
 import {
+  get,
+  isCommentJob,
   isContributionJob,
   isFinalStatus,
-  get,
-  required,
   Job,
-  isCommentJob
+  required
 } from '../lib'
 import * as core from '@actions/core'
 import {track} from '../lib/track'
@@ -32,9 +32,15 @@ const getJobType = (job: Job): string => {
 const getConfidence = (job: Job): number => {
   if (isContributionJob(job)) {
     const probabilities =
-      job.contribution?.predicted_outcome?.file_probabilities || []
-    return Math.min(...probabilities)
+      job.contribution?.predicted_outcome?.file_probabilities
+
+    if (probabilities) {
+      return Math.min(...probabilities)
+    }
+
+    return 0
   }
+
   return 0
 }
 
