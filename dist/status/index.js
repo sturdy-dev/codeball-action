@@ -17977,6 +17977,14 @@ const getJobType = (job) => {
     }
     return 'unknown';
 };
+const getConfidence = (job) => {
+    var _a, _b;
+    if ((0, lib_1.isContributionJob)(job)) {
+        const probabilities = ((_b = (_a = job.contribution) === null || _a === void 0 ? void 0 : _a.predicted_outcome) === null || _b === void 0 ? void 0 : _b.file_probabilities) || [];
+        return Math.min(...probabilities);
+    }
+    return 0;
+};
 const run = (jobID) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Job ID: ${jobID}`);
     let job = yield (0, lib_1.get)(jobID);
@@ -17991,16 +17999,18 @@ const run = (jobID) => __awaiter(void 0, void 0, void 0, function* () {
     return {
         isApproved: isApproved(job),
         isSuggested: isSuggested(job),
-        jobType: getJobType(job)
+        jobType: getJobType(job),
+        confidence: getConfidence(job)
     };
 });
 const jobID = (0, lib_1.required)('codeball-job-id');
 run(jobID)
-    .then(({ isApproved, isSuggested, jobType }) => __awaiter(void 0, void 0, void 0, function* () {
+    .then(({ isApproved, isSuggested, jobType, confidence }) => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, track_1.track)({ jobID, actionName: 'status' });
     core.setOutput('approved', isApproved);
     core.setOutput('suggested', isSuggested);
     core.setOutput('jobType', jobType);
+    core.setOutput('confidence', confidence);
 }))
     .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
