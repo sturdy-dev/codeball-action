@@ -9,8 +9,9 @@ Codeball is a code review AI which approves Pull Requests that a human would hav
 
 The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
 
-* Identifies and **approves** safe contributions
-* _[beta]_ Generates **code suggestions** from comments ([read more](https://codeball.ai/suggester))
+* Labels PRs when they should be reviewed with caution 
+* Identifies and **approves** or labels safe PRs
+* Great defaults, fully customizable and programmable with GitHub Actions
 
 ## GitHub Action
 
@@ -38,11 +39,11 @@ jobs:
       - name: Codeball
         uses: sturdy-dev/codeball-action@v2
         with:
+          # For all configuration options see https://github.com/sturdy-dev/codeball-action/blob/v2/action.yml
           approvePullRequests: "true"
           labelPullRequestsWhenApproved: "true"
           labelPullRequestsWhenReviewNeeded: "false"
           failJobsWhenReviewNeeded: "false"
-          codeSuggestionsFromComments: "false" # Beta (set to "true" to enable)
 ```
 
 2. 🎉 That's it! Codeball will now run on new Pull Requests, and will approve the PR if it's a good one!
