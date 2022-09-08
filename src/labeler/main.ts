@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Octokit, optional, required, features} from '../lib'
+import {features, Octokit, optional, required} from '../lib'
 import {label as labelViaAPI} from '../lib/github'
 import {ForbiddenError} from '../lib/api'
 import {track} from '../lib/track'
@@ -176,10 +176,21 @@ const run = async (): Promise<void> => {
 }
 
 run()
-  .then(async () => await track({jobID, actionName: 'labeler'}))
+  .then(
+    async () =>
+      await track({
+        jobID,
+        actionName: 'labeler',
+        data: {labelName: required('name')}
+      })
+  )
   .catch(async error => {
     if (error instanceof Error) {
-      await track({jobID, actionName: 'labeler', error: error.message})
+      await track({
+        jobID,
+        actionName: 'labeler',
+        error: error.message
+      })
       core.setFailed(error.message)
     }
   })
