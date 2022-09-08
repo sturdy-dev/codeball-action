@@ -5,13 +5,15 @@
 
 # CODEBALL &mdash; AI CODE REVIEW 🔮
 
-Codeball is a code review AI which approves Pull Requests that a human would have approved. Spend less time waiting, save time and money.
+Codeball is a code review AI that scores Pull Requests on a grade from 0 _(needs careful review)_ to 1 _(you should merge this!)_
 
-The AI identifies and approves safe contributions, so that you get to focus your energy on the tricky ones.
+Use Codeball to add labels to help you focus, to auto approve PRs, and more. The Codeball action is easy to use (sane defaults), and is highly customizeable to fit your workflow when needed.
 
-* Labels PRs when they should be reviewed with caution 
-* Identifies and **approves** or labels safe PRs
-* Great defaults, fully customizable and programmable with GitHub Actions
+🏷 Labels PRs when you should **review with caution**  – Stay sharp, get alerted when a PR needs to be reviewed with caution 
+
+✅ Identifies and **approves** or labels safe PRs – Save less time on reviewing easy PRs, focus your energy on what's important 
+
+🏖 **Great defaults**, fully customizable and programmable with GitHub Actions  
 
 ## GitHub Action
 
