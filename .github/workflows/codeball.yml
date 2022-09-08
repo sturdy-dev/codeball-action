@@ -1,48 +1,20 @@
-on: [pull_request]
 name: Codeball
+on:
+  pull_request: {}
+  pull_request_review_comment:
+    types: [created, edited]
+
 jobs:
   codeball_job:
     if: github.repository == 'sturdy-dev/codeball-action'
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-    
-    # Start a new Codeball review job
-    # This step is asynchronous and will return a job id
-    - name: Trigger Codeball
-      id: codeball_baller
-      uses: sturdy-dev/codeball-action/baller@v2
-
-    # Wait for Codeball to return the status
-    - name: Get Status
-      id: codeball_status
-      uses: sturdy-dev/codeball-action/status@v2
-      with:
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-
-    # If Codeball approved the contribution, add a "codeball:approved" label
-    - name: Label Approved
-      uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-      with:
-        name: "codeball:approved"
-        color: "86efac" # green
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-        remove-label-names: "codeball:needs-review"
-
-    # If Codeball did not approve the contribution, add a "codeball:needs-review" label
-    - name: Label Approved
-      uses: sturdy-dev/codeball-action/labeler@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'false' }}
-      with:
-        name: "codeball:needs-review"
-        color: "bfdbfe" # blue
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
-        remove-label-names: "codeball:approved"
-
-    # If Codeball approved the contribution, approve the PR
-    - name: Approve PR
-      uses: sturdy-dev/codeball-action/approver@v2
-      if: ${{ steps.codeball_status.outputs.approved == 'true' }}
-      with:
-        codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
+        with:
+          # For all configuration options see https://github.com/sturdy-dev/codeball-action/blob/v2/action.yml
+          approvePullRequests: "true"
+          labelPullRequestsWhenApproved: "true"
+          labelPullRequestsWhenReviewNeeded: "true"
+          failJobsWhenReviewNeeded: "false"
