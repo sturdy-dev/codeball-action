@@ -10,22 +10,23 @@ const jobID = optional('codeball-job-id')
 const shouldApprove = required('approve') === 'true'
 const githubToken = required('GITHUB_TOKEN')
 const octokit = new Octokit({auth: githubToken})
+const approvalMessage = required('message')
 
 const defaultMessages = [
-  required('message'),
   `> [[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})]`
 ]
 
 const getServerSideMessages = (jobId: string) =>
   listMessages(jobId).then(messages => [
-    required('message'),
     ...messages.map(message => message.text)
   ])
 
-const getMessages = (jobId: string | undefined) =>
-  jobId
-    ? getServerSideMessages(jobId).catch(() => defaultMessages)
+const getMessages = async (jobId: string | undefined): Promise<string[]> => {
+  const messages = jobId
+    ? await getServerSideMessages(jobId).catch(() => defaultMessages)
     : defaultMessages
+  return shouldApprove ? [approvalMessage, ...messages] : messages
+}
 
 const apporveFromActions = async (params: {
   owner: string
