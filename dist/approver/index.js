@@ -21714,17 +21714,67 @@ const github_1 = __nccwpck_require__(8216);
 const track_1 = __nccwpck_require__(4154);
 const messages_1 = __nccwpck_require__(7616);
 const jobID = (0, lib_1.optional)('codeball-job-id');
+const shouldApprove = (0, lib_1.required)('approve') === 'true';
+const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
+const octokit = new lib_1.Octokit({ auth: githubToken });
+const approvalMessage = (0, lib_1.required)('message');
 const defaultMessages = [
-    (0, lib_1.required)('message'),
     `> [[dashboard](https://codeball.ai/${process.env.GITHUB_REPOSITORY})]`
 ];
 const getServerSideMessages = (jobId) => (0, messages_1.list)(jobId).then(messages => [
-    (0, lib_1.required)('message'),
     ...messages.map(message => message.text)
 ]);
-const getMessages = (jobId) => jobId
-    ? getServerSideMessages(jobId).catch(() => defaultMessages)
-    : defaultMessages;
+const getMessages = (jobId) => __awaiter(void 0, void 0, void 0, function* () {
+    const messages = jobId
+        ? yield getServerSideMessages(jobId).catch(() => defaultMessages)
+        : defaultMessages;
+    return shouldApprove ? [approvalMessage, ...messages] : messages;
+});
+const apporveFromActions = (params) => __awaiter(void 0, void 0, void 0, function* () {
+    const existingReviews = yield octokit.pulls
+        .listReviews({
+        owner: params.owner,
+        repo: params.repo,
+        pull_number: params.pull_number
+    })
+        .catch(e => {
+        throw new Error(`failed to current existing reviews ${e}`);
+    })
+        .then(r => r.data);
+    const previousReviews = existingReviews
+        .filter(r => { var _a; return ((_a = r.user) === null || _a === void 0 ? void 0 : _a.type) === 'Bot'; })
+        .sort((a, b) => {
+        var _a, _b;
+        return new Date((_a = a.submitted_at) !== null && _a !== void 0 ? _a : 0).getTime() -
+            new Date((_b = b.submitted_at) !== null && _b !== void 0 ? _b : 0).getTime();
+    });
+    const latestReview = previousReviews.slice(-1).at(0);
+    const latestReviewExists = latestReview !== undefined;
+    const latestReviewIsApproval = (latestReview === null || latestReview === void 0 ? void 0 : latestReview.state) === 'APPROVED';
+    if (latestReviewExists && shouldApprove) {
+        yield octokit.pulls.createReview(params).catch(e => {
+            throw new Error(`failed to create review ${e}`);
+        });
+    }
+    else if (latestReviewExists && !shouldApprove && latestReviewIsApproval) {
+        yield octokit.pulls
+            .dismissReview({
+            review_id: latestReview.id,
+            owner: params.owner,
+            repo: params.repo,
+            pull_number: params.pull_number,
+            message: params.body
+        })
+            .catch(e => {
+            throw new Error(`failed to dismiss review ${e}`);
+        });
+    }
+    else if (!latestReviewExists && shouldApprove) {
+        yield octokit.pulls.createReview(params).catch(e => {
+            throw new Error(`failed to create review ${e}`);
+        });
+    }
+});
 function run() {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     return __awaiter(this, void 0, void 0, function* () {
@@ -21743,8 +21793,6 @@ function run() {
         const repoName = (_g = github.context.payload.repository) === null || _g === void 0 ? void 0 : _g.name;
         if (!repoName)
             throw new Error('No repo name found');
-        const githubToken = (0, lib_1.required)('GITHUB_TOKEN');
-        const octokit = new lib_1.Octokit({ auth: githubToken });
         const reviewMessage = (yield getMessages(jobID)).join('\n\n');
         const pr = yield octokit.pulls
             .get({
@@ -21761,23 +21809,23 @@ function run() {
             core.error('Unable to run this action as the feature is not available for your organization. Please upgrade your Codeball plan, or contact support@codeball.ai');
             return;
         }
-        yield octokit.pulls
-            .createReview({
+        yield apporveFromActions({
             owner: repoOwner,
             repo: repoName,
             pull_number: pullRequestNumber,
             commit_id: commitId,
             body: reviewMessage,
             event: feats.approve ? 'APPROVE' : 'COMMENT'
-        })
-            .catch((error) => __awaiter(this, void 0, void 0, function* () {
+        }).catch((error) => __awaiter(this, void 0, void 0, function* () {
+            core.error(error);
             if (error instanceof Error &&
                 error.message === 'Resource not accessible by integration') {
                 // If the token is not allowed to create reviews (for example it's a pull request from a public fork),
                 // we can try to approve the pull request from the backend with the app token.
                 return (0, github_1.approve)({
                     link: pullRequestURL,
-                    message: reviewMessage
+                    message: reviewMessage,
+                    approve: shouldApprove
                 }).catch(error => {
                     if (error.name === api_1.ForbiddenError.name) {
                         throw new Error(!isPrivate && isFromFork && !isToFork
@@ -22077,8 +22125,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.suggest = exports.label = exports.approve = void 0;
 const api_1 = __nccwpck_require__(9095);
-const approve = ({ link, message }) => __awaiter(void 0, void 0, void 0, function* () {
-    const body = message ? { link, message } : { link };
+const approve = ({ link, message, approve }) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = message ? { link, message, approve } : { link };
     return (0, api_1.post)('/github/pulls/approve', body);
 });
 exports.approve = approve;
@@ -22144,7 +22192,7 @@ exports.list = exports.create = exports.get = void 0;
 const api_1 = __nccwpck_require__(9095);
 const get = (id) => (0, api_1.get)(`/jobs/${id}`);
 exports.get = get;
-const create = ({ url, access_token }) => (0, api_1.post)('/jobs', { url, access_token });
+const create = ({ url, access_token, thresholds }) => (0, api_1.post)('/jobs', { url, access_token, thresholds });
 exports.create = create;
 const list = (params) => (0, api_1.get)('/jobs', new URLSearchParams(params));
 exports.list = list;
@@ -22306,11 +22354,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
-const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
+const track = ({ jobID, actionName, error, data }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)('/track', {
         job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
-        error: error !== null && error !== void 0 ? error : null
+        error: error !== null && error !== void 0 ? error : null,
+        data: data !== null && data !== void 0 ? data : null
     }).catch(error => console.warn(error));
 });
 exports.track = track;

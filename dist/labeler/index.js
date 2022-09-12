@@ -21839,10 +21839,20 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     }));
 });
 run()
-    .then(() => __awaiter(void 0, void 0, void 0, function* () { return yield (0, track_1.track)({ jobID, actionName: 'labeler' }); }))
+    .then(() => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, track_1.track)({
+        jobID,
+        actionName: 'labeler',
+        data: { labelName: (0, lib_1.required)('name') }
+    });
+}))
     .catch((error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof Error) {
-        yield (0, track_1.track)({ jobID, actionName: 'labeler', error: error.message });
+        yield (0, track_1.track)({
+            jobID,
+            actionName: 'labeler',
+            error: error.message
+        });
         core.setFailed(error.message);
     }
 }));
@@ -22122,8 +22132,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.suggest = exports.label = exports.approve = void 0;
 const api_1 = __nccwpck_require__(9095);
-const approve = ({ link, message }) => __awaiter(void 0, void 0, void 0, function* () {
-    const body = message ? { link, message } : { link };
+const approve = ({ link, message, approve }) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = message ? { link, message, approve } : { link };
     return (0, api_1.post)('/github/pulls/approve', body);
 });
 exports.approve = approve;
@@ -22189,7 +22199,7 @@ exports.list = exports.create = exports.get = void 0;
 const api_1 = __nccwpck_require__(9095);
 const get = (id) => (0, api_1.get)(`/jobs/${id}`);
 exports.get = get;
-const create = ({ url, access_token }) => (0, api_1.post)('/jobs', { url, access_token });
+const create = ({ url, access_token, thresholds }) => (0, api_1.post)('/jobs', { url, access_token, thresholds });
 exports.create = create;
 const list = (params) => (0, api_1.get)('/jobs', new URLSearchParams(params));
 exports.list = list;
@@ -22301,11 +22311,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.track = void 0;
 const api_1 = __nccwpck_require__(9095);
-const track = ({ jobID, actionName, error }) => __awaiter(void 0, void 0, void 0, function* () {
+const track = ({ jobID, actionName, error, data }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, api_1.post)('/track', {
         job_id: jobID !== null && jobID !== void 0 ? jobID : null,
         name: actionName,
-        error: error !== null && error !== void 0 ? error : null
+        error: error !== null && error !== void 0 ? error : null,
+        data: data !== null && data !== void 0 ? data : null
     }).catch(error => console.warn(error));
 });
 exports.track = track;
