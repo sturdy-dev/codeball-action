@@ -118,6 +118,8 @@ async function run(): Promise<void> {
     body: reviewMessage,
     event: feats.approve ? 'APPROVE' : 'COMMENT'
   }).catch(async error => {
+    core.error(error)
+
     if (
       error instanceof Error &&
       error.message === 'Resource not accessible by integration'
