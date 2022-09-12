@@ -35,12 +35,6 @@ const apporveFromActions = async (params: {
   body: string
   event: 'APPROVE' | 'COMMENT'
 }) => {
-  const currentUser = await octokit.users
-    .getAuthenticated()
-    .catch(e => {
-      throw new Error(`failed to current user ${e}`)
-    })
-    .then(r => r.data)
   const existingReviews = await octokit.pulls
     .listReviews({
       owner: params.owner,
@@ -53,7 +47,7 @@ const apporveFromActions = async (params: {
     .then(r => r.data)
 
   const previousReviews = existingReviews
-    .filter(r => r.user?.id === currentUser.id)
+    .filter(r => r.user?.type === 'Bot')
     .sort(
       (a, b) =>
         new Date(a.submitted_at ?? 0).getTime() -
