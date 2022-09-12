@@ -35,12 +35,20 @@ const apporveFromActions = async (params: {
   body: string
   event: 'APPROVE' | 'COMMENT'
 }) => {
-  const currentUser = await octokit.users.getAuthenticated().then(r => r.data)
+  const currentUser = await octokit.users
+    .getAuthenticated()
+    .catch(e => {
+      throw new Error(`failed to current user ${e}`)
+    })
+    .then(r => r.data)
   const existingReviews = await octokit.pulls
     .listReviews({
       owner: params.owner,
       repo: params.repo,
       pull_number: params.pull_number
+    })
+    .catch(e => {
+      throw new Error(`failed to current existing reviews ${e}`)
     })
     .then(r => r.data)
 
@@ -57,17 +65,25 @@ const apporveFromActions = async (params: {
   const latestReviewIsApproval = latestReview?.state === 'APPROVED'
 
   if (latestReviewExists && shouldApprove) {
-    await octokit.pulls.createReview(params)
-  } else if (latestReviewExists && !shouldApprove && latestReviewIsApproval) {
-    await octokit.pulls.dismissReview({
-      review_id: latestReview.id,
-      owner: params.owner,
-      repo: params.repo,
-      pull_number: params.pull_number,
-      message: params.body
+    await octokit.pulls.createReview(params).catch(e => {
+      throw new Error(`failed to create review ${e}`)
     })
+  } else if (latestReviewExists && !shouldApprove && latestReviewIsApproval) {
+    await octokit.pulls
+      .dismissReview({
+        review_id: latestReview.id,
+        owner: params.owner,
+        repo: params.repo,
+        pull_number: params.pull_number,
+        message: params.body
+      })
+      .catch(e => {
+        throw new Error(`failed to dismiss review ${e}`)
+      })
   } else if (!latestReviewExists && shouldApprove) {
-    await octokit.pulls.createReview(params)
+    await octokit.pulls.createReview(params).catch(e => {
+      throw new Error(`failed to create review ${e}`)
+    })
   }
 }
 
