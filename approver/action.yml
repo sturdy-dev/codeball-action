@@ -17,6 +17,10 @@ inputs:
   codeball-job-id:
     description: 'The ID of the Codeball Job created by the Baller Action'
     required: false
+  approve:
+    description: "If set to 'true', will approve pull request"
+    default: true
+    required: true
 
 runs:
   using: 'node16'
