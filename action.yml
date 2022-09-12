@@ -57,6 +57,9 @@ runs:
     - name: Trigger Codeball
       id: codeball_baller
       uses: sturdy-dev/codeball-action/baller@v2
+      with:
+        approveThreshold: ${{ inputs.approveThreshold }}
+        carefulReviewThreshold: ${{ inputs.carefulReviewThreshold }}
 
     # Wait for Codeball to return the status
     - name: Get Status
@@ -101,9 +104,10 @@ runs:
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
       uses: sturdy-dev/codeball-action/approver@v2
-      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.approvePullRequests == 'true' && steps.codeball_status.outputs.confidence >= inputs.approveThreshold }}
+      if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.approvePullRequests == 'true' }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
+        approve: ${{ steps.codeball_status.outputs.confidence >= inputs.approveThreshold }}
 
     # If Codeball have code suggestions, add suggestions as comments
     - name: Add Suggestions

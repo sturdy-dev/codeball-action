@@ -2,12 +2,14 @@ import {post} from '../../api'
 
 export const approve = async ({
   link,
-  message
+  message,
+  approve
 }: {
   link: string
   message?: string
+  approve: boolean
 }) => {
-  const body = message ? {link, message} : {link}
+  const body = message ? {link, message, approve} : {link}
   return post('/github/pulls/approve', body)
 }
 
