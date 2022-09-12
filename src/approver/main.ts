@@ -2,11 +2,14 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {features, Octokit, optional, required} from '../lib'
 import {ForbiddenError} from '../lib/api'
-import {approve} from '../lib/github'
+import {approve as approveFromServer} from '../lib/github'
 import {track} from '../lib/track'
 import {list as listMessages} from '../lib/jobs/messages'
 
 const jobID = optional('codeball-job-id')
+const shouldApprove = required('approve') === 'true'
+const githubToken = required('GITHUB_TOKEN')
+const octokit = new Octokit({auth: githubToken})
 
 const defaultMessages = [
   required('message'),
@@ -24,6 +27,50 @@ const getMessages = (jobId: string | undefined) =>
     ? getServerSideMessages(jobId).catch(() => defaultMessages)
     : defaultMessages
 
+const apporveFromActions = async (params: {
+  owner: string
+  repo: string
+  pull_number: number
+  commit_id: string
+  body: string
+  event: 'APPROVE' | 'COMMENT'
+}) => {
+  const currentUser = await octokit.users.getAuthenticated().then(r => r.data)
+  const existingReviews = await octokit.pulls
+    .listReviews({
+      owner: params.owner,
+      repo: params.repo,
+      pull_number: params.pull_number
+    })
+    .then(r => r.data)
+
+  const previousReviews = existingReviews
+    .filter(r => r.user?.id === currentUser.id)
+    .sort(
+      (a, b) =>
+        new Date(a.submitted_at ?? 0).getTime() -
+        new Date(b.submitted_at ?? 0).getTime()
+    )
+  const latestReview = previousReviews.slice(-1).at(0)
+
+  const latestReviewExists = latestReview !== undefined
+  const latestReviewIsApproval = latestReview?.state === 'APPROVED'
+
+  if (latestReviewExists && shouldApprove) {
+    await octokit.pulls.createReview(params)
+  } else if (latestReviewExists && !shouldApprove && latestReviewIsApproval) {
+    await octokit.pulls.dismissReview({
+      review_id: latestReview.id,
+      owner: params.owner,
+      repo: params.repo,
+      pull_number: params.pull_number,
+      message: params.body
+    })
+  } else if (!latestReviewExists && shouldApprove) {
+    await octokit.pulls.createReview(params)
+  }
+}
+
 async function run(): Promise<void> {
   const pullRequestURL = github.context.payload?.pull_request?.html_url
   if (!pullRequestURL) throw new Error('No pull request URL found')
@@ -39,9 +86,6 @@ async function run(): Promise<void> {
 
   const repoName = github.context.payload.repository?.name
   if (!repoName) throw new Error('No repo name found')
-
-  const githubToken = required('GITHUB_TOKEN')
-  const octokit = new Octokit({auth: githubToken})
 
   const reviewMessage = (await getMessages(jobID)).join('\n\n')
 
@@ -66,39 +110,38 @@ async function run(): Promise<void> {
     return
   }
 
-  await octokit.pulls
-    .createReview({
-      owner: repoOwner,
-      repo: repoName,
-      pull_number: pullRequestNumber,
-      commit_id: commitId,
-      body: reviewMessage,
-      event: feats.approve ? 'APPROVE' : 'COMMENT'
-    })
-    .catch(async error => {
-      if (
-        error instanceof Error &&
-        error.message === 'Resource not accessible by integration'
-      ) {
-        // If the token is not allowed to create reviews (for example it's a pull request from a public fork),
-        // we can try to approve the pull request from the backend with the app token.
-        return approve({
-          link: pullRequestURL,
-          message: reviewMessage
-        }).catch(error => {
-          if (error.name === ForbiddenError.name) {
-            throw new Error(
-              !isPrivate && isFromFork && !isToFork
-                ? 'Codeball Approver failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to approve Pull Requests.'
-                : 'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
-            )
-          }
-          throw error
-        })
-      } else {
+  await apporveFromActions({
+    owner: repoOwner,
+    repo: repoName,
+    pull_number: pullRequestNumber,
+    commit_id: commitId,
+    body: reviewMessage,
+    event: feats.approve ? 'APPROVE' : 'COMMENT'
+  }).catch(async error => {
+    if (
+      error instanceof Error &&
+      error.message === 'Resource not accessible by integration'
+    ) {
+      // If the token is not allowed to create reviews (for example it's a pull request from a public fork),
+      // we can try to approve the pull request from the backend with the app token.
+      return approveFromServer({
+        link: pullRequestURL,
+        message: reviewMessage,
+        approve: shouldApprove
+      }).catch(error => {
+        if (error.name === ForbiddenError.name) {
+          throw new Error(
+            !isPrivate && isFromFork && !isToFork
+              ? 'Codeball Approver failed to access GitHub. Install https://github.com/apps/codeball-ai-writer to the base repository to give Codeball permission to approve Pull Requests.'
+              : 'Codeball Approver failed to access GitHub. Check the "GITHUB_TOKEN Permissions" of this job and make sure that the job has WRITE permissions to Pull Requests.'
+          )
+        }
         throw error
-      }
-    })
+      })
+    } else {
+      throw error
+    }
+  })
 }
 
 run()
