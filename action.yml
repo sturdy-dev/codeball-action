@@ -57,6 +57,9 @@ runs:
     - name: Trigger Codeball
       id: codeball_baller
       uses: sturdy-dev/codeball-action/baller@v2
+      with:
+        approveThreshold: ${{ inputs.approveThreshold }}
+        carefulReviewThreshold: ${{ inputs.carefulReviewThreshold }}
 
     # Wait for Codeball to return the status
     - name: Get Status

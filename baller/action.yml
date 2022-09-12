@@ -8,6 +8,16 @@ inputs:
     description: 'Default to {{ github.token }}. This is the default GitHub token available to actions and is used to run Codeball and to post the result. The default token permissions (https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#permissions) work fine.'
     default: '${{ github.token }}'
     required: false
+
+  approveThreshold:
+    description: 'The threshold to use for "approving" (greater than or equal to). A number between 0 and 1. Must be specified with 3 decimals.'
+    default: "0.935"
+    required: false
+
+  carefulReviewThreshold:
+    description: 'The threshold to use for "careful review" actions (less than). A number between 0 and 1. Must be specified with 3 decimals.'
+    default: "0.300"
+    required: false
 outputs:
   codeball-job-id:
     description: 'ID of the Codeball Job'

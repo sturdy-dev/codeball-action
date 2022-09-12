@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {create} from '../lib'
+import {create, optional} from '../lib'
 import {track} from '../lib/track'
 
 async function run(): Promise<{jobId: string}> {
@@ -15,10 +15,19 @@ async function run(): Promise<{jobId: string}> {
   core.info(`Found contribution: ${pullRequestURL}`)
   if (commentURL) core.info(`Found comment: ${commentURL}`)
 
+  const approve: number = parseFloat(optional('approveThreshold') || '0.935')
+  const carefulReview: number = parseFloat(
+    optional('carefulReviewThreshold') || '0.300'
+  )
+
   const job = await create({
     // if commentURL is present, we are in the context of a comment action, so trigger that.
     url: commentURL ?? pullRequestURL,
-    access_token: githubToken
+    access_token: githubToken,
+    thresholds: {
+      approve,
+      careful_review: carefulReview
+    }
   })
 
   core.info(`Job created: ${job.id}`)
