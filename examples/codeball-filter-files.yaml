@@ -35,6 +35,6 @@ jobs:
       # If Codeball approved the contribution, approve the PR
       - name: Approve PR
         uses: sturdy-dev/codeball-action/approver@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
         with:
           message: "Codeball: LGTM! :+1:"
+          with: ${{ steps.codeball_status.outputs.approved }}
