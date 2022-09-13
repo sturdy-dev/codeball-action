@@ -17,7 +17,6 @@ jobs:
         id: codeball_baller
         uses: sturdy-dev/codeball-action/baller@v2
 
-
       # Wait for Codeball to return the status
       - name: Get Status
         id: codeball_status
