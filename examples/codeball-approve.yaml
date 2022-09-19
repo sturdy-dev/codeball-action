@@ -10,13 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Codeball
     steps:
-
       # Start a new Codeball review job
       # This step is asynchronous and will return a job id
       - name: Trigger Codeball
         id: codeball_baller
         uses: sturdy-dev/codeball-action/baller@v2
-
 
       # Wait for Codeball to return the status
       - name: Get Status
@@ -28,6 +26,6 @@ jobs:
       # If Codeball approved the contribution, approve the PR
       - name: Approve PR
         uses: sturdy-dev/codeball-action/approver@v2
-        if: ${{ steps.codeball_status.outputs.approved == 'true' }}
         with:
-          message: "Codeball: LGTM! :+1:"
+          message: 'Codeball: LGTM! :+1:'
+          approve: ${{ steps.codeball_status.outputs.approved }}
