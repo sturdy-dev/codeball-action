@@ -61,7 +61,7 @@ runs:
     # This step is asynchronous and will return a job id
     - name: Trigger Codeball
       id: codeball_baller
-      uses: sturdy-dev/codeball-action/baller@v2
+      uses: sturdy-dev/codeball-action/baller@beta
       with:
         approveThreshold: ${{ inputs.approveThreshold }}
         carefulReviewThreshold: ${{ inputs.carefulReviewThreshold }}
@@ -70,13 +70,13 @@ runs:
     # Wait for Codeball to return the status
     - name: Get Status
       id: codeball_status
-      uses: sturdy-dev/codeball-action/status@v2
+      uses: sturdy-dev/codeball-action/status@beta
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
 
     # If the Codeball confidence is high, add the "codeball:approved" label
     - name: Label Approved
-      uses: sturdy-dev/codeball-action/labeler@v2
+      uses: sturdy-dev/codeball-action/labeler@beta
       if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenApproved == 'true' && steps.codeball_status.outputs.confidence >= inputs.approveThreshold  }}
       with:
         name: "codeball:approved"
@@ -88,7 +88,7 @@ runs:
 
     # If the Codeball confidence is medium, add the "codeball:needs-review" label
     - name: Label Needs Review
-      uses: sturdy-dev/codeball-action/labeler@v2
+      uses: sturdy-dev/codeball-action/labeler@beta
       if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenReviewNeeded == 'true' && steps.codeball_status.outputs.confidence >= inputs.carefulReviewThreshold && steps.codeball_status.outputs.confidence < inputs.approveThreshold  }}
       with:
         name: "codeball:needs-review"
@@ -100,7 +100,7 @@ runs:
 
     # If the Codeball confidence is low, add the "codeball:needs-careful-review" label
     - name: Label Needs Careful Review
-      uses: sturdy-dev/codeball-action/labeler@v2
+      uses: sturdy-dev/codeball-action/labeler@beta
       if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.labelPullRequestsWhenCarefulReviewNeeded == 'true' && steps.codeball_status.outputs.confidence < inputs.carefulReviewThreshold }}
       with:
         name: "codeball:needs-careful-review"
@@ -112,7 +112,7 @@ runs:
 
     # If Codeball approved the contribution, approve the PR
     - name: Approve PR
-      uses: sturdy-dev/codeball-action/approver@v2
+      uses: sturdy-dev/codeball-action/approver@beta
       if: ${{ steps.codeball_status.outputs.jobType == 'contribution' && inputs.approvePullRequests == 'true' }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
@@ -121,7 +121,7 @@ runs:
 
     # If Codeball have code suggestions, add suggestions as comments
     - name: Add Suggestions
-      uses: sturdy-dev/codeball-action/suggester@v2
+      uses: sturdy-dev/codeball-action/suggester@beta
       if: ${{ steps.codeball_status.outputs.suggested == 'true' && inputs.codeSuggestionsFromComments == 'true' && steps.codeball_status.outputs.jobType == 'comment' }}
       with:
         codeball-job-id: ${{ steps.codeball_baller.outputs.codeball-job-id }}
