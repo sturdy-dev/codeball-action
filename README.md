@@ -186,7 +186,37 @@ jobs:
 ```
 </details>
 
+### Example: Running Codeball as a different user (to support CODEOWNERS, etc)
 
+<details>
+  <summary>▶️ run-different-user.yml</summary>
+  
+  #### Instructions
+  
+1. If you don't have one already, create a new GitHub bot account (a normal account, named something like `your-org-bot`)
+2. Invite the account to your repository or org, and give it WRITE permissions
+3. Generate a Personal Access Token for the bot account
+4. Create a new Organization Action Secret (https://github.com/organizations/YOUR-ORG-NAME/settings/secrets/actions), or Repository secret (https://github.com/YOUR-ORG-NAME/YOUR-REPO/settings/secrets/actions) named `CODEBALL_BOT_TOKEN` with the PAT as the value.
+5. Add `GITHUB_TOKEN: ${{ secrets.CODEBALL_BOT_TOKEN }}` to your `codeball.yml` (see example below)
+6. All Codeball related actions (adding/removing labels, approving PRs, etc) will now run as your newly configured user!
+7. _(Optional)_ Add your new user to CODEOWNERS 
+
+```yaml
+name: Codeball
+on:
+  pull_request: {}
+
+jobs:
+  codeball_job:
+    runs-on: ubuntu-latest
+    name: Codeball
+    steps:
+      - name: Codeball
+        uses: sturdy-dev/codeball-action@v2
+        with:
+          GITHUB_TOKEN: ${{ secrets.CODEBALL_BOT_TOKEN }}
+```
+</details>
 
 ## Building Blocks
 
