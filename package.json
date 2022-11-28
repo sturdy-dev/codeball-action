@@ -34,7 +34,7 @@
     "@octokit/plugin-paginate-rest": "^5.0.1",
     "@octokit/plugin-rest-endpoint-methods": "^6.7.0",
     "https-proxy-agent": "^5.0.1",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",
