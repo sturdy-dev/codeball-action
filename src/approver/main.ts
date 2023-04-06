@@ -28,7 +28,7 @@ const getMessages = async (jobId: string | undefined): Promise<string[]> => {
   return shouldApprove ? [approvalMessage, ...messages] : messages
 }
 
-const apporveFromActions = async (params: {
+const approveFromActions = async (params: {
   owner: string
   repo: string
   pull_number: number
@@ -121,7 +121,7 @@ async function run(): Promise<void> {
     return
   }
 
-  await apporveFromActions({
+  await approveFromActions({
     owner: repoOwner,
     repo: repoName,
     pull_number: pullRequestNumber,
